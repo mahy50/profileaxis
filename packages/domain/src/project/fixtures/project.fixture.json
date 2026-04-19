@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectId": "proj-fixture-001",
+  "name": " Fixture 项目 — 标准三层层架 ",
+  "locale": "zh-CN",
+  "unitSystem": "mm",
+  "stdlibVersion": "0.1.0",
+  "ruleVersion": "0.1.0",
+  "catalogVersion": "2025-Q4",
+  "resolvedDsl": {
+    "dslVersion": "1.0.0",
+    "projectType": "storage_rack",
+    "sourceRevisionId": "rev-001",
+    "overallSizeMm": { "width": 2700, "depth": 900, "height": 2000 },
+    "modules": [
+      { "moduleId": "bay-0", "kind": "rect-bay", "spanMm": 2700 }
+    ],
+    "nodes": [
+      {
+        "nodeId": "node-001",
+        "kind": "member",
+        "role": "upright",
+        "semanticPath": "bay[0].upright.front.left",
+        "axis": "z",
+        "start": { "x": 0, "y": 0, "z": 0 },
+        "end": { "x": 0, "y": 0, "z": 2000 },
+        "lengthMm": 2000,
+        "profileSpecKey": "upright-40x40-2mm",
+        "provenance": { "source": "rule", "ruleIds": ["rule-gen-uprights"] },
+        "finishKey": "RAL-7016",
+        "tags": []
+      },
+      {
+        "nodeId": "node-002",
+        "kind": "member",
+        "role": "beamX",
+        "semanticPath": "bay[0].level[1].front.beamX",
+        "axis": "x",
+        "start": { "x": 0, "y": 0, "z": 600 },
+        "end": { "x": 2700, "y": 0, "z": 600 },
+        "lengthMm": 2700,
+        "profileSpecKey": "beam-c-50x30-1.5mm",
+        "provenance": { "source": "rule", "ruleIds": ["rule-gen-beams"] },
+        "finishKey": "RAL-7016",
+        "tags": []
+      }
+    ],
+    "joints": [
+      {
+        "jointId": "joint-001",
+        "topology": "corner-3way",
+        "semanticPath": "bay[0].level[1].corner.front.left",
+        "position": { "x": 0, "y": 0, "z": 600 },
+        "memberIds": ["node-001", "node-002"],
+        "connectorSpecKey": "corner-bracket-m6",
+        "connectorFamilyKey": "corner-bracket"
+      }
+    ]
+  },
+  "structuralNodes": [],
+  "jointNodes": [],
+  "designBom": [],
+  "tradeBom": [],
+  "checkIssues": [],
+  "currentRevisionId": "rev-001",
+  "commandCursor": 0,
+  "snapshotIds": [],
+  "intentDsl": null,
+  "confirmationDsl": null,
+  "draftDsl": null,
+  "uiState": {}
+}

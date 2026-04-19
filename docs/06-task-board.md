@@ -89,7 +89,16 @@ P0-014（可与 P0-003 后任意时间并行）
 - Fixtures 全部通过校验（4/4）
 - Gate P0-002 自动检查项全部 PASS
 
-**下一个任务：P0-003**（建立 packages/domain）
+**P0-003：建立 packages/domain** ✅ **已完成**（2026-04-20）
+
+- 完整 domain 类型体系：StructuralNode / JointNode / CommandEntry / CheckIssue / DesignBomItem / TradeBomItem
+- 所有类型文件按 architecture 约束分布在 `src/project/`、`src/command/`、`src/bom/`、`src/checks/`、`src/structural/`、`src/joint/`
+- Vec3、EntityRef、RevisionId 等 scalar 类型集中于 index.ts
+- TypeScript strict mode 编译通过，fixtures schemaVersion = 1.0.0
+- Gate P0-003 自动检查项全部 PASS
+- **禁止依赖** apps、render-babylon 等应用层（约束满足）
+
+**下一个任务：P0-004**（建立 packages/stdlib）
 
 ## 状态定义
 

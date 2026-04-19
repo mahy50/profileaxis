@@ -1,0 +1,58 @@
+{
+  "designBom": [
+    {
+      "itemId": "bom-d-001",
+      "nodeId": "node-001",
+      "profileSpecKey": "upright-40x40-2mm",
+      "description": "立柱 40x40 2mm",
+      "quantity": 4,
+      "unit": "pcs",
+      "material": "Q235",
+      "lengthMm": 2000,
+      "weightEstimateKg": 4.71,
+      "semanticPath": "bay[0].upright.front.left"
+    },
+    {
+      "itemId": "bom-d-002",
+      "nodeId": "node-002",
+      "profileSpecKey": "beam-c-50x30-1.5mm",
+      "description": "横梁 C 型 50x30 1.5mm",
+      "quantity": 12,
+      "unit": "pcs",
+      "material": "Q235",
+      "lengthMm": 2700,
+      "weightEstimateKg": 8.10,
+      "semanticPath": "bay[0].level[1].front.beamX"
+    }
+  ],
+  "tradeBom": [
+    {
+      "itemId": "bom-t-001",
+      "sku": "SKU-U40-2000-SS",
+      "supplierCode": "SUP-A",
+      "productName": "立柱 40x40x2000 灰色",
+      "description": "40x40x2000 2mm RAL-7016",
+      "quantity": 4,
+      "unit": "pcs",
+      "unitPrice": 68.5,
+      "currency": "CNY",
+      "leadTimeDays": 7,
+      "mappingStatus": "mapped",
+      "matchedDesignItemIds": ["bom-d-001"]
+    },
+    {
+      "itemId": "bom-t-002",
+      "sku": null,
+      "supplierCode": "SUP-A",
+      "productName": "横梁 C 型待确认",
+      "description": "C 型横梁 50x30 待定规格",
+      "quantity": 12,
+      "unit": "pcs",
+      "unitPrice": null,
+      "currency": "CNY",
+      "leadTimeDays": null,
+      "mappingStatus": "unmapped",
+      "matchedDesignItemIds": ["bom-d-002"]
+    }
+  ]
+}

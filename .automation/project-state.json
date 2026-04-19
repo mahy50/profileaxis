@@ -2,13 +2,13 @@
   "schemaVersion": "1.0.0",
   "activeTaskId": null,
   "activeRunId": null,
-  "lastCompletedTaskId": "P0-002",
+  "lastCompletedTaskId": "P0-003",
   "lastRunStatus": "completed",
   "lastHeartbeatAt": null,
   "retryBudget": {
     "P0-001": { "attempts": 1, "lastStatus": "completed" },
     "P0-002": { "attempts": 1, "lastStatus": "completed" },
-    "P0-003": { "attempts": 0, "lastStatus": null },
+    "P0-003": { "attempts": 1, "lastStatus": "completed" },
     "P0-004": { "attempts": 0, "lastStatus": null },
     "P0-005": { "attempts": 0, "lastStatus": null },
     "P0-006": { "attempts": 0, "lastStatus": null },
@@ -21,7 +21,7 @@
     "P0-013": { "attempts": 0, "lastStatus": null },
     "P0-014": { "attempts": 0, "lastStatus": null }
   },
-  "completedTasks": ["P0-001", "P0-002"],
+  "completedTasks": ["P0-001", "P0-002", "P0-003"],
   "blockedTasks": [],
   "failedTasks": []
 }

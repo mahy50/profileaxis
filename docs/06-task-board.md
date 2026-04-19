@@ -74,9 +74,22 @@ P0-014（可与 P0-003 后任意时间并行）
 
 ## 第一个任务
 
-**P0-001：初始化 monorepo 与 CI**
+**P0-001：初始化 monorepo 与 CI** ✅ **已完成**（2026-04-19）
 
-这是唯一允许在没有前置依赖的情况下启动的任务。
+- monorepo 结构建立（packages/domain, packages/schemas, apps/api, apps/web）
+- pnpm workspaces 配置完成
+- CI pipeline 搭建完成（lint + typecheck + test）
+- 所有包 typecheck 通过
+
+**P0-002：建立 packages/schemas** ✅ **已完成**（2026-04-20）
+
+- DSL JSON Schema 文件（intent-dsl, confirmation-dsl, draft-dsl, resolved-dsl）
+- AI I/O API Schema 文件（intent, draft）
+- Runtime validator 使用 Ajv，支持格式校验
+- Fixtures 全部通过校验（4/4）
+- Gate P0-002 自动检查项全部 PASS
+
+**下一个任务：P0-003**（建立 packages/domain）
 
 ## 状态定义
 

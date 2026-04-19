@@ -1,0 +1,33 @@
+{
+  "name": "@profileaxis/schemas",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./validators": {
+      "import": "./dist/validators/validator.js",
+      "types": "./dist/validators/validator.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.validators.json && cp -r src/dsl dist/ && cp -r src/api dist/",
+    "typecheck": "tsc --noEmit",
+    "test": "node dist/validators/run-fixtures.js",
+    "validate:fixtures": "node dist/validators/run-fixtures.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@profileaxis/domain": "workspace:*",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}

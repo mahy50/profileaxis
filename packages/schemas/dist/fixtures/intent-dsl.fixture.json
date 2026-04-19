@@ -1,0 +1,30 @@
+{
+    "dslVersion": "1.0.0",
+    "projectType": "storage_rack",
+    "space": {
+        "widthMm": 3000,
+        "depthMm": 1000,
+        "heightMm": 2000,
+        "placement": "floor"
+    },
+    "capacity": {
+        "shelfCount": 4,
+        "loadTier": "medium"
+    },
+    "preferences": {
+        "profileSeries": "C41",
+        "rearBrace": true,
+        "caster": false
+    },
+    "constraints": {
+        "againstWall": true,
+        "maxWidthMm": null
+    },
+    "ambiguities": [
+        {
+            "key": "load_per_shelf",
+            "question": "每层货架预期承重是多少？",
+            "status": "open"
+        }
+    ]
+}

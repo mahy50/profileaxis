@@ -1,0 +1,10 @@
+{
+  "decisions": [
+    {
+      "key": "profile_series",
+      "question": "确认使用C41型材系列？",
+      "resolution": "confirmed_C41",
+      "confirmedAt": "2026-04-19T10:00:00.000Z"
+    }
+  ]
+}

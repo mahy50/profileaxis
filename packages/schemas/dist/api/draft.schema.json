@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "draft.schema.json",
+  "title": "AI Draft Proposal I/O Schema",
+  "description": "M1 frozen - AI draft proposal request/response",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/definitions/ProposeDraftRequest" },
+    { "$ref": "#/definitions/DraftResponse" }
+  ],
+  "definitions": {
+    "ProposeDraftRequest": {
+      "type": "object",
+      "required": ["intentDsl"],
+      "properties": {
+        "intentDsl": { "$ref": "../dsl/intent-dsl.schema.json" },
+        "confirmationDsl": {
+          "oneOf": [
+            { "$ref": "../dsl/confirmation-dsl.schema.json" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "DraftResponse": {
+      "type": "object",
+      "required": ["draftDsl"],
+      "properties": {
+        "draftDsl": { "$ref": "../dsl/draft-dsl.schema.json" }
+      },
+      "additionalProperties": false
+    },
+    "AIResponse": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status", "data"],
+          "properties": {
+            "status": { "type": "string", "const": "ok" },
+            "data": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["status", "reason"],
+          "properties": {
+            "status": { "type": "string", "const": "refusal" },
+            "reason": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["status", "message"],
+          "properties": {
+            "status": { "type": "string", "const": "schema_error" },
+            "message": { "type": "string" },
+            "schemaPath": { "type": "string" }
+          }
+        }
+      ]
+    }
+  }
+}

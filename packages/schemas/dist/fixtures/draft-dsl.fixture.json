@@ -1,0 +1,14 @@
+{
+    "dslVersion": "1.0.0",
+    "modules": [
+        {
+            "moduleId": "module_001",
+            "kind": "rect-bay",
+            "intent": {
+                "spanMm": 1500,
+                "levels": 4,
+                "loadTier": "medium"
+            }
+        }
+    ]
+}

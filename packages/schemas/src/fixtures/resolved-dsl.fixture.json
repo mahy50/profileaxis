@@ -1,0 +1,86 @@
+{
+  "dslVersion": "1.0.0",
+  "projectType": "storage_rack",
+  "sourceRevisionId": "rev_001",
+  "overallSizeMm": {
+    "width": 3000,
+    "depth": 1000,
+    "height": 2000
+  },
+  "modules": [
+    {
+      "moduleId": "bay_001",
+      "kind": "rect-bay",
+      "spanMm": 1500
+    },
+    {
+      "moduleId": "bay_002",
+      "kind": "rect-bay",
+      "spanMm": 1500
+    }
+  ],
+  "nodes": [
+    {
+      "nodeId": "node_upright_front_left",
+      "kind": "member",
+      "role": "upright",
+      "semanticPath": "bay[0].level[0].upright.frontLeft",
+      "axis": "z",
+      "start": { "x": 0, "y": 0, "z": 0 },
+      "end": { "x": 0, "y": 0, "z": 2000 },
+      "lengthMm": 2000,
+      "profileSpecKey": "C41_Upright_2000",
+      "provenance": {
+        "source": "rule",
+        "ruleIds": ["rule_geometry_01"]
+      },
+      "finishKey": "white",
+      "tags": []
+    },
+    {
+      "nodeId": "node_upright_front_right",
+      "kind": "member",
+      "role": "upright",
+      "semanticPath": "bay[0].level[0].upright.frontRight",
+      "axis": "z",
+      "start": { "x": 1500, "y": 0, "z": 0 },
+      "end": { "x": 1500, "y": 0, "z": 2000 },
+      "lengthMm": 2000,
+      "profileSpecKey": "C41_Upright_2000",
+      "provenance": {
+        "source": "rule",
+        "ruleIds": ["rule_geometry_01"]
+      },
+      "finishKey": "white",
+      "tags": []
+    },
+    {
+      "nodeId": "node_beam_front_bottom",
+      "kind": "member",
+      "role": "beamX",
+      "semanticPath": "bay[0].level[1].beam.front",
+      "axis": "x",
+      "start": { "x": 0, "y": 500, "z": 0 },
+      "end": { "x": 1500, "y": 500, "z": 0 },
+      "lengthMm": 1500,
+      "profileSpecKey": "C41_BeamX_1500",
+      "provenance": {
+        "source": "rule",
+        "ruleIds": ["rule_geometry_02"]
+      },
+      "finishKey": "white",
+      "tags": []
+    }
+  ],
+  "joints": [
+    {
+      "jointId": "joint_front_bottom_left",
+      "topology": "corner-3way",
+      "semanticPath": "bay[0].level[1].joint.frontLeft",
+      "position": { "x": 0, "y": 500, "z": 0 },
+      "memberIds": ["node_upright_front_left", "node_beam_front_bottom"],
+      "connectorSpecKey": "C41_Con_3Way",
+      "connectorFamilyKey": "standard_corner"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "confirmation-dsl.schema.json",
+  "title": "ConfirmationDsl",
+  "description": "M1 frozen - decisions requiring user confirmation",
+  "type": "object",
+  "required": ["decisions"],
+  "properties": {
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "question", "resolution", "confirmedAt"],
+        "properties": {
+          "key": { "type": "string" },
+          "question": { "type": "string" },
+          "resolution": { "type": "string" },
+          "confirmedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

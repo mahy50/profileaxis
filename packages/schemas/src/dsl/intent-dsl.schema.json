@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "intent-dsl.schema.json",
+  "title": "IntentDsl",
+  "description": "M1 frozen - captures user intent and ambiguities",
+  "type": "object",
+  "required": ["dslVersion", "projectType", "space", "capacity", "preferences", "constraints", "ambiguities"],
+  "properties": {
+    "dslVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "projectType": {
+      "type": "string",
+      "const": "storage_rack"
+    },
+    "space": {
+      "type": "object",
+      "required": ["widthMm", "depthMm", "heightMm", "placement"],
+      "properties": {
+        "widthMm": { "type": "number", "minimum": 1 },
+        "depthMm": { "type": "number", "minimum": 1 },
+        "heightMm": { "type": "number", "minimum": 1 },
+        "placement": { "type": "string", "const": "floor" }
+      }
+    },
+    "capacity": {
+      "type": "object",
+      "required": ["shelfCount", "loadTier"],
+      "properties": {
+        "shelfCount": { "type": "number", "minimum": 1, "maximum": 20 },
+        "loadTier": { "type": "string", "enum": ["light", "medium", "heavy"] }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "required": ["profileSeries", "rearBrace", "caster"],
+      "properties": {
+        "profileSeries": { "type": ["string", "null"] },
+        "rearBrace": { "type": ["boolean", "null"] },
+        "caster": { "type": "boolean" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": ["againstWall", "maxWidthMm"],
+      "properties": {
+        "againstWall": { "type": "boolean" },
+        "maxWidthMm": { "type": ["number", "null"], "minimum": 1 }
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "question", "status"],
+        "properties": {
+          "key": { "type": "string" },
+          "question": { "type": "string" },
+          "status": { "type": "string", "enum": ["open", "resolved"] }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

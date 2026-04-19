@@ -1,0 +1,17 @@
+# automation state (keep project-state.json, ignore ephemeral)
+.automation/results/
+.automation/runs/
+.automation/locks/
+.automation/heartbeats/
+
+# temp
+*.tmp
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

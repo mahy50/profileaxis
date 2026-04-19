@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "schedule": {
+    "cron": "0 * * * *",
+    "timezone": "Asia/Shanghai",
+    "enabled": true
+  },
+  "timeouts": {
+    "executing": 30,
+    "validating": 10,
+    "documenting": 5,
+    "heartbeatInterval": 2,
+    "staleThreshold": 10
+  },
+  "retryPolicy": {
+    "maxTaskRetry": 2,
+    "maxStageRetry": 1,
+    "staleBeforeBlocked": 2,
+    "sameErrorStopThreshold": 2
+  },
+  "openclaw": {
+    "sessionTarget": "isolated",
+    "timeoutMinutes": 45
+  },
+  "paths": {
+    "root": ".automation",
+    "tasks": ".automation/tasks",
+    "results": ".automation/results",
+    "runs": ".automation/runs",
+    "locks": ".automation/locks",
+    "heartbeats": ".automation/heartbeats"
+  },
+  "documents": {
+    "taskBoard": "docs/06-task-board.md",
+    "acceptanceGates": "docs/07-acceptance-gates.md",
+    "architecture": "docs/02-architecture.md",
+    "monorepoDesign": "docs/03-monorepo-design.md",
+    "apiContracts": "docs/04-api-contracts.md"
+  }
+}

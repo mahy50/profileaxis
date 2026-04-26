@@ -1,10 +1,10 @@
 {
   "schemaVersion": "1.0.0",
-  "activeTaskId": "P0-011",
-  "activeRunId": "20260427000500-22301",
-  "lastCompletedTaskId": "P0-010",
+  "activeTaskId": "P0-012",
+  "activeRunId": null,
+  "lastCompletedTaskId": "P0-011",
   "lastRunStatus": "completed",
-  "lastHeartbeatAt": "2026-04-26T18:23:15Z",
+  "lastHeartbeatAt": "2026-04-26T19:28:21Z",
   "retryBudget": {
     "P0-001": {
       "attempts": 1,
@@ -47,8 +47,8 @@
       "lastStatus": "completed"
     },
     "P0-011": {
-      "attempts": 1,
-      "lastStatus": "executing"
+      "attempts": 2,
+      "lastStatus": "completed"
     },
     "P0-012": {
       "attempts": 0,
@@ -72,7 +72,9 @@
     "P0-006",
     "P0-007",
     "P0-008",
-    "P0-009"
+    "P0-009",
+    "P0-010",
+    "P0-011"
   ],
   "blockedTasks": [],
   "failedTasks": []

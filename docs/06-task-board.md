@@ -23,7 +23,7 @@
 | P0-008 | 建立 packages/bom | 设计 BOM / 交易 BOM 双链路 | P0-004, P0-006 | `packages/stdlib` | `packages/bom/src/design/`、`packages/bom/src/trade/`、`packages/bom/src/mapping/` | 行项、数量、映射状态可复核；设计 BOM ≥98%，交易 BOM ≥95% | completed |
 | P0-009 | 建立 packages/export | SVG 三视图、PDF payload | P0-008 | `packages/bom` | `packages/export/src/svg/`、`packages/export/src/pdf-payload/` | 三视图 SVG 关键尺寸正确 | completed |
 | P0-010 | 建立 packages/ai-contracts | prompts、tool schema、AI DTO、error envelope | P0-002 | `packages/schemas` | `packages/ai-contracts/src/prompts/`、`packages/ai-contracts/src/tools/` | 所有 tool schema 符合 M1 冻结要求 | completed |
-| P0-011 | 建立 apps/api AI endpoints | `intent / draft / edit-intent / check-explain` 四个 endpoint | P0-005, P0-010 | `packages/rules + ai-contracts` | `apps/api/src/routes/`、`apps/api/src/services/ai-orchestrator/` | 接口返回 strict schema 合法结果 | queued |
+| P0-011 | 建立 apps/api AI endpoints | `intent / draft / edit-intent / check-explain` 四个 endpoint | P0-005, P0-010 | `packages/rules + ai-contracts` | `apps/api/src/routes/`、`apps/api/src/services/ai-orchestrator/` | 接口返回 strict schema 合法结果 | completed |
 | P0-012 | 建立 apps/web 编辑器壳层 | Vue 3 + Pinia + Babylon 集成 + IndexedDB | P0-007, P0-008, P0-011 | `packages/render-babylon + bom + api` | `apps/web/src/stores/`、`apps/web/src/features/editor/` | Scene / 结构树 / 选择同步可用 | queued |
 | P0-013 | 命令系统 | 语义命令、撤销/重做、快照恢复 | P0-003 | `packages/domain` | command bus、persistence store | 20 次编辑内历史一致；snapshot restore 后全部一致 | queued |
 | P0-014 | 本地持久化底座 | IndexedDB projects / snapshots / commands | P0-003 | `packages/domain` | IndexedDB repo、snapshot repo | 刷新后可恢复最近项目 | queued |
@@ -146,7 +146,28 @@ P0-014（可与 P0-003 后任意时间并行）
 - TypeScript strict mode 编译通过（tsc --noEmit exit 0）
 - Gate P0-008 自动检查项全部 PASS
 
-**下一个任务：P0-011**（建立 apps/api AI endpoints）
+**P0-010：建立 packages/ai-contracts** ✅ **已完成**（2026-04-26）
+
+- `packages/ai-contracts/src/prompts/`：system/intent/draft/edit-intent/check-explain prompt 模板
+- `packages/ai-contracts/src/tools/`：tool schema（intent_tool / draft_tool / edit_intent_tool / check_explain_tool）
+- `packages/ai-contracts/src/dto/`：AI DTO（IntentResponse / DraftResponse / EditIntentResponse / CheckExplainResponse）
+- `packages/ai-contracts/src/error/`：error envelope（AiError / Refusal / SchemaError）
+- TypeScript strict mode 编译通过
+- Gate P0-010 自动检查项全部 PASS
+
+**P0-011：建立 apps/api AI endpoints** ✅ **已完成**（2026-04-27）
+
+- `apps/api/src/routes/ai-intent.ts`：POST /v1/ai/intent — 接收用户消息，返回 intent 分类
+- `apps/api/src/routes/ai-draft.ts`：POST /v1/ai/draft — 接收确认 DSL，返回 draft DSL
+- `apps/api/src/routes/ai-edit-intent.ts`：POST /v1/ai/edit-intent — 接收编辑上下文，返回编辑意图
+- `apps/api/src/routes/check-explain.ts`：POST /v1/ai/check-explain — 接收检测问题，返回解释
+- `apps/api/src/services/ai-orchestrator/index.ts`：AI 编排服务，封装 Anthropic API 调用、tool 强制、schema 校验、三态 envelope
+- `apps/api/src/__tests__/contract.test.ts`：20 条契约测试全部通过
+- TypeScript strict mode 编译通过
+- Gate P0-011 AI 响应三态（ok/refusal/schema_error）全部验证通过
+- 所有 endpoint 通过 CORS 在 `apps/api/src/index.ts` 注册
+
+**下一个任务：P0-012**（建立 apps/web 编辑器壳层）
 
 **P0-009：建立 packages/export** ✅ **已完成**（2026-04-23）
 

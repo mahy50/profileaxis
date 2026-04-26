@@ -18,7 +18,7 @@
 | P0-008 | 建立 packages/bom（设计 BOM / 交易 BOM 双链路） | P0 | P0-004, P0-006 | queued |
 | P0-009 | 建立 packages/export（SVG 三视图、PDF payload） | P0 | P0-008 | queued |
 | P0-010 | 建立 packages/ai-contracts（prompts、tool schema、DTO、error envelope） | P0 | P0-002 | queued |
-| P0-011 | 建立 apps/api AI endpoints（intent / draft / edit-intent / check-explain） | P0 | P0-005, P0-010 | queued |
+| P0-011 | 建立 apps/api AI endpoints（intent / draft / edit-intent / check-explain） | P0 | P0-005, P0-010 | completed |
 | P0-012 | 建立 apps/web 编辑器壳层（Vue 3 + Pinia + Babylon 集成） | P0 | P0-007, P0-008, P0-011 | queued |
 | P0-013 | 命令系统（语义命令、撤销/重做、快照恢复） | P0 | P0-003 | queued |
 | P0-014 | 本地持久化底座（IndexedDB projects / snapshots / commands） | P0 | P0-003 | queued |

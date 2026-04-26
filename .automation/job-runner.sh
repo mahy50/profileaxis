@@ -341,7 +341,7 @@ if [[ -n "$active" ]] && [[ "$active" != "null" ]]; then
   
   if is_stale "$active"; then
     warn "$active 已 stale"
-    local att=$(json_get "d['retryBudget'].get('$active',{}).get('attempts',0)")
+    att=$(json_get "d['retryBudget'].get('$active',{}).get('attempts',0)")
     if [[ $att -ge 2 ]]; then
       warn "$active 已达最大重试，标记 blocked"
       json_set "blockedTasks" "$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(json.dumps(d.get('blockedTasks',[])+['$active']))")"

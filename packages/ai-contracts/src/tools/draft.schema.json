@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "intentDsl": {
+      "type": "object",
+      "description": "Confirmed IntentDsl object"
+    },
+    "confirmationDsl": {
+      "type": "object",
+      "description": "Optional ConfirmationDsl with resolved decisions"
+    }
+  },
+  "required": ["intentDsl"],
+  "additionalProperties": false
+}

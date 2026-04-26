@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "referenceContext": {
+      "type": "object",
+      "description": "Current editor ReferenceContext (selection, camera, structure)"
+    },
+    "editText": {
+      "type": "string",
+      "description": "User edit request text"
+    }
+  },
+  "required": ["referenceContext", "editText"],
+  "additionalProperties": false
+}

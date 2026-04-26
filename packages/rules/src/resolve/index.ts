@@ -298,7 +298,7 @@ function buildJoints(
       semanticPath: baseJointPath,
       position: vec3(pos.x, pos.y, pos.z),
       memberIds: [uprightNode?.nodeId].filter((id): id is NodeId => id !== undefined),
-      connectorSpecKey: 'FOOT-BASE-PLATE',
+      connectorSpecKey: 'JC-FOOT',
       connectorFamilyKey: 'foot',
     });
   }

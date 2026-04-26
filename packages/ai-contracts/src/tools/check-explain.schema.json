@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "properties": {
+    "issueIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "IDs of check issues to explain"
+    },
+    "locale": {
+      "type": "string",
+      "enum": ["zh-CN", "en-US"],
+      "default": "zh-CN",
+      "description": "Explanation locale"
+    }
+  },
+  "required": ["issueIds"],
+  "additionalProperties": false
+}

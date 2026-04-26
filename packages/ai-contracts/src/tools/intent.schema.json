@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "User requirement text in natural language"
+    },
+    "locale": {
+      "type": "string",
+      "enum": ["zh-CN", "en-US"],
+      "default": "zh-CN",
+      "description": "User locale"
+    }
+  },
+  "required": ["text"],
+  "additionalProperties": false
+}

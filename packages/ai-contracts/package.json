@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/tools dist/",
     "typecheck": "tsc --noEmit",
     "test": "echo \"No tests yet\"",
     "clean": "rm -rf dist"

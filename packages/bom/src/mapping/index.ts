@@ -1,13 +1,24 @@
 // @profileaxis/bom/mapping — SKU → supplier lookup and coverage
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve as pathResolve } from 'node:path';
 import type { MappingStatus } from '../types.js';
 import type { DesignBomItem, TradeBomItem, SupplierPolicy, SkuMapping } from '../types.js';
 
-// ── Stdlib data imports ────────────────────────────────────────────────────────
-// These files are produced by the stdlib build step.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-import skuMappingsRaw from '../../../stdlib/dist/sku_maps/sku-mappings.json' assert { type: 'json' };
-import supplierPoliciesRaw from '../../../stdlib/dist/policies/supplier-policies.json' assert { type: 'json' };
+// ── Stdlib data loading ────────────────────────────────────────────────────────
+// These files are produced by the stdlib build step. Using readFileSync for
+// Node.js ESM compatibility (avoids import assertion issues).
+
+function loadJson<T>(relativePath: string): T {
+  return JSON.parse(readFileSync(pathResolve(__dirname, relativePath), 'utf-8')) as T;
+}
+
+const skuMappingsRaw = loadJson<any[]>('../../../stdlib/dist/sku_maps/sku-mappings.json');
+const supplierPoliciesRaw = loadJson<any[]>('../../../stdlib/dist/policies/supplier-policies.json');
 
 // ── Typed stdlib data ─────────────────────────────────────────────────────────
 
@@ -68,17 +79,13 @@ const SUPPLIER_POLICIES: Map<string, SupplierPolicy> = new Map(
       name: p.name,
       moq: p.minOrderQty,
       leadTimeDays: p.leadTimeDays,
-      priceTiers: [{ minQty: p.minOrderQty, unitPrice: 0 }], // base tier; per-SKU price from SKU map
+      priceTiers: [{ minQty: p.minOrderQty, unitPrice: 0 }],
     },
   ])
 );
 
 // ── SKU lookup ─────────────────────────────────────────────────────────────────
 
-/**
- * Find SKU mapping for a profileSpecKey.
- * Returns the first matching entry (multiple entries may exist for different lengths).
- */
 export function findSkuMapping(profileSpecKey: string): SkuMapping | null {
   const found = SKU_MAP.find(m => m.profileSpecKey === profileSpecKey);
   if (!found) return null;
@@ -86,10 +93,6 @@ export function findSkuMapping(profileSpecKey: string): SkuMapping | null {
   return rest as SkuMapping;
 }
 
-/**
- * Find SKU mapping for a connectorSpecKey.
- * Connectors use connectorSpecKey as the match field.
- */
 export function findConnectorSkuMapping(connectorSpecKey: string): SkuMapping | null {
   const found = SKU_MAP.find(m => m.connectorSpecKey === connectorSpecKey);
   if (!found) return null;
@@ -97,16 +100,10 @@ export function findConnectorSkuMapping(connectorSpecKey: string): SkuMapping | 
   return rest as SkuMapping;
 }
 
-/**
- * Get supplier policy by supplierId.
- */
 export function getSupplierPolicy(supplierId: string): SupplierPolicy | null {
   return SUPPLIER_POLICIES.get(supplierId) ?? null;
 }
 
-/**
- * Resolve mapping status for a single design BOM item.
- */
 export function resolveMappingStatus(designItem: DesignBomItem): MappingStatus {
   if (designItem.kind === 'structural' && designItem.profileSpecKey) {
     const found = findSkuMapping(designItem.profileSpecKey);
@@ -121,18 +118,12 @@ export function resolveMappingStatus(designItem: DesignBomItem): MappingStatus {
 
 // ── Coverage ───────────────────────────────────────────────────────────────────
 
-/**
- * Compute design BOM coverage: fraction of design items that are mapped.
- */
 export function designCoverage(items: DesignBomItem[]): number {
   if (items.length === 0) return 100;
   const mapped = items.filter(i => resolveMappingStatus(i) === 'mapped').length;
   return (mapped / items.length) * 100;
 }
 
-/**
- * Compute trade BOM coverage: fraction of trade BOM items that have a price.
- */
 export function tradeCoverage(items: TradeBomItem[]): number {
   if (items.length === 0) return 100;
   const priced = items.filter(i => i.unitPrice > 0).length;

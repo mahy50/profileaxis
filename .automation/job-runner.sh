@@ -30,15 +30,16 @@ die()  { log "FATAL: $*"; exit 1; }
 
 json_get() { python3 -c "import json; d=json.load(open('$STATE_FILE')); print(json.dumps(${1:-d}, ensure_ascii=False))" 2>/dev/null || echo "null"; }
 json_set() {
+  local _path="$1" _val="$2"
   python3 -c "
 import json
 d=json.load(open('$STATE_FILE'))
-keys='$1'.split('.')
+keys='$_path'.split('.')
 v=d
 for k in keys[:-1]: v=v[k]
-v[keys[-1]]=$2
+v[keys[-1]] = json.loads('''$_val''')
 json.dump(d, open('$STATE_FILE','w'), ensure_ascii=False, indent=2)
-" 2>/dev/null || warn "json_set failed: $1=$2"
+" 2>/dev/null || warn "json_set failed: $_path=$_val"
 }
 
 pick_next_task() {
@@ -245,12 +246,12 @@ PROMPT
 EOF
 
     # 更新 project-state
-    json_set "lastCompletedTaskId" "\"$task_id\""
+    json_set "lastCompletedTaskId" '"$task_id"'
     json_set "activeTaskId" "null"
     json_set "activeRunId" "null"
-    json_set "lastRunStatus" "\"completed\""
-    json_set "lastHeartbeatAt" "\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
-    json_set "retryBudget.$task_id.lastStatus" "\"completed\""
+    json_set "lastRunStatus" '"completed"'
+    json_set "lastHeartbeatAt" '"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'
+    json_set "retryBudget.$task_id.lastStatus" '"completed"'
 
     # 更新 task-board 状态
     python3 -c "
@@ -284,14 +285,15 @@ with open('$TASK_BOARD', 'w') as f:
     write_heartbeat "$task_id" "failed"
     
     # 记录失败
-    json_set "retryBudget.$task_id.lastStatus" "\"failed\""
-    local attempts=$(json_get "d['retryBudget']['$task_id']['attempts']")
+    json_set "retryBudget.$task_id.lastStatus" '"failed"'
+    attempts=$(json_get "d['retryBudget']['$task_id']['attempts']")
+    [[ "$attempts" == "null" ]] && attempts=0
     attempts=$((attempts + 1))
     json_set "retryBudget.$task_id.attempts" "$attempts"
     
     if [[ $attempts -ge 2 ]]; then
       warn "$task_id 已失败 $attempts 次，标记为 blocked"
-      json_set "blockedTasks" "$(json_get "d.get('blockedTasks',[]) + ['$task_id']")"
+      json_set "blockedTasks" "$(python3 -c "import json; d=json.load(open('$STATE_FILE')); bl=d.get('blockedTasks',[])+['$task_id']; print(json.dumps(bl))") "
       json_set "activeTaskId" "null"
     fi
     
@@ -342,6 +344,7 @@ if [[ -n "$active" ]] && [[ "$active" != "null" ]]; then
   if is_stale "$active"; then
     warn "$active 已 stale"
     att=$(json_get "d['retryBudget'].get('$active',{}).get('attempts',0)")
+    [[ "$att" == "null" ]] && att=0
     if [[ $att -ge 2 ]]; then
       warn "$active 已达最大重试，标记 blocked"
       json_set "blockedTasks" "$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(json.dumps(d.get('blockedTasks',[])+['$active']))")"

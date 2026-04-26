@@ -1,10 +1,10 @@
 {
   "schemaVersion": "1.0.0",
-  "activeTaskId": "P0-012",
+  "activeTaskId": null,
   "activeRunId": null,
-  "lastCompletedTaskId": "P0-011",
+  "lastCompletedTaskId": "P0-012",
   "lastRunStatus": "completed",
-  "lastHeartbeatAt": "2026-04-26T22:58:15Z",
+  "lastHeartbeatAt": "2026-04-27T06:58:00Z",
   "retryBudget": {
     "P0-001": {
       "attempts": 1,
@@ -52,7 +52,7 @@
     },
     "P0-012": {
       "attempts": 0,
-      "lastStatus": null
+      "lastStatus": "completed"
     },
     "P0-013": {
       "attempts": 0,

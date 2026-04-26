@@ -7,6 +7,8 @@ import { resolve } from './resolve/index.js';
 import { check } from './checks/index.js';
 import type { NormalizedIntent, NormalizeResult } from './types.js';
 
+export const RULE_VERSION = '1.0.0-m1';
+
 export { normalizeDraftDsl, resolve, check };
 export type { NormalizedIntent, NormalizeResult };
 

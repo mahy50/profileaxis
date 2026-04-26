@@ -17,6 +17,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.58.0
+        version: 0.58.0
       '@profileaxis/ai-contracts':
         specifier: workspace:*
         version: link:../../packages/ai-contracts
@@ -45,6 +48,9 @@ importers:
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
+      vitest:
+        specifier: ^1.6.1
+        version: 1.6.1(@types/node@20.19.39)
 
   apps/web:
     dependencies:
@@ -252,6 +258,10 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@anthropic-ai/sdk@0.58.0':
+    resolution: {integrity: sha512-wF8w+LB0AlKVLYUQho0nbK0uDv0K5Cgb92dbh8213t4roilnQ9Tm6zndheIaUxQdoEAeb0uoOT+GkkoIkqD8+A==}
+    hasBin: true
 
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
@@ -1197,6 +1207,8 @@ packages:
     engines: {node: '>=12.20'}
 
 snapshots:
+
+  '@anthropic-ai/sdk@0.58.0': {}
 
   '@babel/helper-string-parser@7.27.1': {}
 

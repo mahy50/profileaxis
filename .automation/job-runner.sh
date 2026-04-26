@@ -43,14 +43,14 @@ json.dump(d, open('$STATE_FILE','w'), ensure_ascii=False, indent=2)
 
 pick_next_task() {
   python3 -c "
-import re
 with open('$TASK_BOARD') as f:
     lines = f.readlines()
 for l in lines:
     if l.startswith('| P0-'):
         cols = [c.strip() for c in l.split('|')]
-        if len(cols) >= 8 and cols[7] == 'queued':
-            print(cols[2])
+        # 8 列: TaskId|标题|目标|依赖|输入|输出|验收标准|状态
+        if len(cols) >= 9 and cols[8] == 'queued':
+            print(cols[1])
             break
 " 2>/dev/null
 }

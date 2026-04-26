@@ -11,22 +11,22 @@
 
 ### P0 任务（阻塞发布）
 
-| TaskId | 标题 | 目标 | 依赖 | 输入 | 输出 | 验收标准 |
-|--------|------|------|------|------|------|----------|
-| P0-001 | 初始化 monorepo 与 CI | 建立单仓开发底座 | — | — | workspace、lint、typecheck、test pipeline | PR 合并前 CI 全部绿 |
-| P0-002 | 建立 packages/schemas | 冻结 DSL / API contract、fixture、runtime validator | P0-001 | — | `packages/schemas/src/dsl/`、`packages/schemas/src/api/` | fixture 全部过 validator |
-| P0-003 | 建立 packages/domain | 冻结 ProjectDocument / Command / StructuralNode / JointNode / CheckIssue | P0-002 | `packages/schemas` | `packages/domain/src/project/`、`packages/domain/src/command/` | 类型与 fixture 一致 |
-| P0-004 | 建立 packages/stdlib | 建立首批 profile / connector / supplier policy / sku_map 种子数据 | P0-003 | `packages/domain` | `packages/stdlib/src/profiles/`、`packages/stdlib/src/connectors/` | 至少支持 3 个典型货架案例 |
-| P0-005 | 建立 packages/rules | 打通 `draftDsl → resolvedDsl → checks` 规则合法化 | P0-003, P0-004 | `packages/domain + stdlib + schemas` | `packages/rules/src/normalize/`、`packages/rules/src/resolve/`、`packages/rules/src/checks/` | 10 条 golden 中至少 8 条产出合法 resolvedDsl |
-| P0-006 | 建立 packages/modeler | `resolvedDsl → geometry / SceneViewModel / DimensionViewModel` | P0-005 | `packages/rules` | `packages/modeler/src/geometry/`、`packages/modeler/src/scene-vm/` | 选中 / 高亮 / 树同步 geometry 可用 |
-| P0-007 | 建立 packages/render-babylon | Babylon Scene 适配、选中、高亮、thin-instance picking | P0-006 | `packages/modeler` | `packages/render-babylon/src/scene-adapter/`、`packages/render-babylon/src/picking/` | thin-instance picking 稳定；Scene 可从 ProjectDocument 重建 |
-| P0-008 | 建立 packages/bom | 设计 BOM / 交易 BOM 双链路 | P0-004, P0-006 | `packages/stdlib` | `packages/bom/src/design/`、`packages/bom/src/trade/`、`packages/bom/src/mapping/` | 行项、数量、映射状态可复核；设计 BOM ≥98%，交易 BOM ≥95% |
-| P0-009 | 建立 packages/export | SVG 三视图、PDF payload | P0-008 | `packages/bom` | `packages/export/src/svg/`、`packages/export/src/pdf-payload/` | 三视图 SVG 关键尺寸正确 |
-| P0-010 | 建立 packages/ai-contracts | prompts、tool schema、AI DTO、error envelope | P0-002 | `packages/schemas` | `packages/ai-contracts/src/prompts/`、`packages/ai-contracts/src/tools/` | 所有 tool schema 符合 M1 冻结要求 |
-| P0-011 | 建立 apps/api AI endpoints | `intent / draft / edit-intent / check-explain` 四个 endpoint | P0-005, P0-010 | `packages/rules + ai-contracts` | `apps/api/src/routes/`、`apps/api/src/services/ai-orchestrator/` | 接口返回 strict schema 合法结果 |
-| P0-012 | 建立 apps/web 编辑器壳层 | Vue 3 + Pinia + Babylon 集成 + IndexedDB | P0-007, P0-008, P0-011 | `packages/render-babylon + bom + api` | `apps/web/src/stores/`、`apps/web/src/features/editor/` | Scene / 结构树 / 选择同步可用 |
-| P0-013 | 命令系统 | 语义命令、撤销/重做、快照恢复 | P0-003 | `packages/domain` | command bus、persistence store | 20 次编辑内历史一致；snapshot restore 后全部一致 |
-| P0-014 | 本地持久化底座 | IndexedDB projects / snapshots / commands | P0-003 | `packages/domain` | IndexedDB repo、snapshot repo | 刷新后可恢复最近项目 |
+| TaskId | 标题 | 目标 | 依赖 | 输入 | 输出 | 验收标准 | 状态 |
+|--------|------|------|------|------|------|----------|------|
+| P0-001 | 初始化 monorepo 与 CI | 建立单仓开发底座 | — | — | workspace、lint、typecheck、test pipeline | PR 合并前 CI 全部绿 | completed |
+| P0-002 | 建立 packages/schemas | 冻结 DSL / API contract、fixture、runtime validator | P0-001 | — | `packages/schemas/src/dsl/`、`packages/schemas/src/api/` | fixture 全部过 validator | completed |
+| P0-003 | 建立 packages/domain | 冻结 ProjectDocument / Command / StructuralNode / JointNode / CheckIssue | P0-002 | `packages/schemas` | `packages/domain/src/project/`、`packages/domain/src/command/` | 类型与 fixture 一致 | completed |
+| P0-004 | 建立 packages/stdlib | 建立首批 profile / connector / supplier policy / sku_map 种子数据 | P0-003 | `packages/domain` | `packages/stdlib/src/profiles/`、`packages/stdlib/src/connectors/` | 至少支持 3 个典型货架案例 | completed |
+| P0-005 | 建立 packages/rules | 打通 `draftDsl → resolvedDsl → checks` 规则合法化 | P0-003, P0-004 | `packages/domain + stdlib + schemas` | `packages/rules/src/normalize/`、`packages/rules/src/resolve/`、`packages/rules/src/checks/` | 10 条 golden 中至少 8 条产出合法 resolvedDsl | completed |
+| P0-006 | 建立 packages/modeler | `resolvedDsl → geometry / SceneViewModel / DimensionViewModel` | P0-005 | `packages/rules` | `packages/modeler/src/geometry/`、`packages/modeler/src/scene-vm/` | 选中 / 高亮 / 树同步 geometry 可用 | completed |
+| P0-007 | 建立 packages/render-babylon | Babylon Scene 适配、选中、高亮、thin-instance picking | P0-006 | `packages/modeler` | `packages/render-babylon/src/scene-adapter/`、`packages/render-babylon/src/picking/` | thin-instance picking 稳定；Scene 可从 ProjectDocument 重建 | completed |
+| P0-008 | 建立 packages/bom | 设计 BOM / 交易 BOM 双链路 | P0-004, P0-006 | `packages/stdlib` | `packages/bom/src/design/`、`packages/bom/src/trade/`、`packages/bom/src/mapping/` | 行项、数量、映射状态可复核；设计 BOM ≥98%，交易 BOM ≥95% | completed |
+| P0-009 | 建立 packages/export | SVG 三视图、PDF payload | P0-008 | `packages/bom` | `packages/export/src/svg/`、`packages/export/src/pdf-payload/` | 三视图 SVG 关键尺寸正确 | completed |
+| P0-010 | 建立 packages/ai-contracts | prompts、tool schema、AI DTO、error envelope | P0-002 | `packages/schemas` | `packages/ai-contracts/src/prompts/`、`packages/ai-contracts/src/tools/` | 所有 tool schema 符合 M1 冻结要求 | completed |
+| P0-011 | 建立 apps/api AI endpoints | `intent / draft / edit-intent / check-explain` 四个 endpoint | P0-005, P0-010 | `packages/rules + ai-contracts` | `apps/api/src/routes/`、`apps/api/src/services/ai-orchestrator/` | 接口返回 strict schema 合法结果 | queued |
+| P0-012 | 建立 apps/web 编辑器壳层 | Vue 3 + Pinia + Babylon 集成 + IndexedDB | P0-007, P0-008, P0-011 | `packages/render-babylon + bom + api` | `apps/web/src/stores/`、`apps/web/src/features/editor/` | Scene / 结构树 / 选择同步可用 | queued |
+| P0-013 | 命令系统 | 语义命令、撤销/重做、快照恢复 | P0-003 | `packages/domain` | command bus、persistence store | 20 次编辑内历史一致；snapshot restore 后全部一致 | queued |
+| P0-014 | 本地持久化底座 | IndexedDB projects / snapshots / commands | P0-003 | `packages/domain` | IndexedDB repo、snapshot repo | 刷新后可恢复最近项目 | queued |
 
 ### P1 任务（首版闭环，不阻断发布）
 
@@ -146,7 +146,7 @@ P0-014（可与 P0-003 后任意时间并行）
 - TypeScript strict mode 编译通过（tsc --noEmit exit 0）
 - Gate P0-008 自动检查项全部 PASS
 
-**下一个任务：P0-010**（建立 packages/ai-contracts）
+**下一个任务：P0-011**（建立 apps/api AI endpoints）
 
 **P0-009：建立 packages/export** ✅ **已完成**（2026-04-23）
 

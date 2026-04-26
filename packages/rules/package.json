@@ -1,0 +1,29 @@
+{
+  "name": "@profileaxis/rules",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:golden": "vitest run test/golden.test.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@profileaxis/domain": "workspace:*",
+    "@profileaxis/schemas": "workspace:*",
+    "@profileaxis/stdlib": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.1"
+  }
+}

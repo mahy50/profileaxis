@@ -1,0 +1,22 @@
+{
+  "name": "Case 10: Width near limit (width=5800, tests normalization edge without structural violation)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 5800, "depthMm": 900, "heightMm": 2000, "placement": "floor" },
+          "capacity": { "shelfCount": 3, "loadTier": "medium" },
+          "preferences": { "profileSeries": null, "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": false, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 16,
+  "expectedJointCount": 19,
+  "note": "Width should be clamped to MAX_WIDTH_MM=12000; this tests normalization edge case"
+}

@@ -1,0 +1,23 @@
+{
+  "profileKey": "PC-AI50-50-3",
+  "seriesName": "AI50",
+  "crossSection": "equal angle iron",
+  "dimensions": {
+    "widthMm": 50,
+    "heightMm": 50,
+    "wallThicknessMm": 3.0
+  },
+  "material": "Q235 steel",
+  "weightKgPerM": 2.33,
+  "loadRatingN": 15000,
+  "finishOptions": [
+    {
+      "finishKey": "FZ-pre galvanized",
+      "description": "Pre-galvanized (Z275 g/m²)"
+    },
+    {
+      "finishKey": "PP-RAL7042",
+      "description": "Powder-coated RAL 7042 traffic grey B"
+    }
+  ]
+}

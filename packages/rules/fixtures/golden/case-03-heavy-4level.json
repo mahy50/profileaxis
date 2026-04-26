@@ -1,0 +1,21 @@
+{
+  "name": "Case 3: Heavy load, 4 levels (width=3600, depth=1100, height=2400, shelf=4)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 3600, "depthMm": 1100, "heightMm": 2400, "placement": "floor" },
+          "capacity": { "shelfCount": 4, "loadTier": "heavy" },
+          "preferences": { "profileSeries": "U90", "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": false, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 20,
+  "expectedJointCount": 20
+}

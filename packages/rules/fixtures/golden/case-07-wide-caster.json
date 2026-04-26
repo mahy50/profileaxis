@@ -1,0 +1,21 @@
+{
+  "name": "Case 7: Wide heavy rack with caster (width=4500, depth=1200, height=2500, shelf=4, caster=true)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 4500, "depthMm": 1200, "heightMm": 2500, "placement": "floor" },
+          "capacity": { "shelfCount": 4, "loadTier": "heavy" },
+          "preferences": { "profileSeries": "U90", "rearBrace": false, "caster": true },
+          "constraints": { "againstWall": false, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 24,
+  "expectedJointCount": 20
+}

@@ -1,0 +1,31 @@
+{
+  "profileKey": "PA-UC90-70-2.5",
+  "seriesName": "UC90",
+  "crossSection": "C-channel",
+  "dimensions": {
+    "widthMm": 90,
+    "heightMm": 70,
+    "wallThicknessMm": 2.5
+  },
+  "material": "Q355 steel",
+  "weightKgPerM": 5.24,
+  "loadRatingN": 85000,
+  "finishOptions": [
+    {
+      "finishKey": "FZ-pre galvanized",
+      "description": "Pre-galvanized (Z275 g/m²), interior use"
+    },
+    {
+      "finishKey": "PP-RAL5015",
+      "description": "Powder-coated RAL 5015 sky blue, standard rack color"
+    },
+    {
+      "finishKey": "PP-RAL6011",
+      "description": "Powder-coated RAL 6011 reseda green"
+    },
+    {
+      "finishKey": "EP-electrophoretic",
+      "description": "Electrophoretic dip coating, highest corrosion resistance"
+    }
+  ]
+}

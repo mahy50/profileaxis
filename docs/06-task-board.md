@@ -98,7 +98,66 @@ P0-014（可与 P0-003 后任意时间并行）
 - Gate P0-003 自动检查项全部 PASS
 - **禁止依赖** apps、render-babylon 等应用层（约束满足）
 
-**下一个任务：P0-004**（建立 packages/stdlib）
+**P0-004：建立 packages/stdlib** ✅ **已完成**（2026-04-21）
+
+- 3 个典型型材 Profile（UC90 C-channel、SB60 step beam、AI50 angle iron）
+- 5 种 joint connector（corner-3way / tee-3way / cross-4way / brace-end / foot）
+- 供应商策略 JSON（SSW / HZL / FAS）
+- SKU 映射 JSON（8 条映射）
+- `dist/catalog.fixture.json` 可加载
+- Gate P0-004 自动检查项全部 PASS
+
+**P0-005：建立 packages/rules** ✅ **已完成**（2026-04-20）
+
+- normalize / resolve / checks 三层流水线打通
+- 10/10 golden fixtures 全部通过（42 tests）
+- TypeScript 编译无错误
+- Gate P0-005 自动检查项全部 PASS
+
+**P0-006：建立 packages/modeler** ✅ **已完成**（2026-04-21）
+
+- geometry/index.ts：Vec3 数学工具、nodeToGeometry（BoxGeometry）、jointToGeometry（CylinderGeometry）、computeModuleBounds、computeOverallDimensions
+- scene-vm/index.ts：buildSceneViewModel（纯函数、幂等、无 Babylon 实例）
+- types.ts：GeometryPrimitive、BoxGeometry、CylinderGeometry、SceneViewModel、DimensionAnnotation、ModuleView
+- TypeScript 编译无错误
+- Gate P0-006 自动检查项全部 PASS
+
+**P0-007：建立 packages/render-babylon** ✅ **已完成**（2026-04-22）
+
+- `packages/render-babylon/src/scene-adapter/index.ts`：BabylonSceneAdapter，从 resolvedDsl 完整重建 Scene，支持 ArcRotateCamera（iso/front/right/top）、背景色、render loop
+- `packages/render-babylon/src/scene-adapter/mesh-pool.ts`：GeometryMeshPool，LRU 回收，per-geometry-type 薄实例池（2000 slots/pool）
+- `packages/render-babylon/src/scene-adapter/highlight.ts`：HighlightLayerManager，支持 selected/hovered/highlighted/error 四态
+- `packages/render-babylon/src/scene-adapter/diff-applier.ts`：computeSceneDiff + applySceneDiff，增量更新 Scene
+- `packages/render-babylon/src/picking/index.ts`：thin-instance picking，scene.pick() + filterTypes/filterIds，pickRay
+- `packages/render-babylon/src/types.ts`：Babylon 隔离类型（ISceneAdapter、PickResult、HighlightState、SceneDiff 等）
+- `@babylonjs/core@^7.0.0` 已添加为 dependency
+- TypeScript strict mode 编译通过（tsc exit 0）
+- Gate P0-007 自动检查项全部 PASS
+
+**P0-008：建立 packages/bom** ✅ **已完成**（2026-04-22）
+
+- `packages/bom/src/types.ts`：DesignBomItem、TradeBomItem、SupplierPolicy、SkuMapping、BomSummary、MappingStatus
+- `packages/bom/src/design/index.ts`：designBomFromResolvedDsl，按 profileSpecKey 分组合并 structural nodes，按 connectorSpecKey 分组合并 joints，聚合数量与总长度
+- `packages/bom/src/trade/index.ts`：tradeBomFromDesignBom + applySupplierPolicy，SKU 映射应用 MOQ/lead time/price tier
+- `packages/bom/src/mapping/index.ts`：SKU lookup（profileSpecKey + connectorSpecKey 双查找链），coverage 计算，导入 stdlib JSON 数据
+- `packages/bom/src/index.ts`：re-exports + computeBomSummary(resolvedDsl) 顶层入口
+- `packages/bom/src/__fixtures__/fixtures.ts`：3 个 golden cases（simple 2-bay / unmapped custom profile / multi-bay with braces）
+- `packages/bom/dist/bom.fixture.json`：含所有计算值的 fixture 数据
+- TypeScript strict mode 编译通过（tsc --noEmit exit 0）
+- Gate P0-008 自动检查项全部 PASS
+
+**下一个任务：P0-010**（建立 packages/ai-contracts）
+
+**P0-009：建立 packages/export** ✅ **已完成**（2026-04-23）
+
+- `packages/export/src/svg/index.ts`：三视图 SVG 生成（front/right/top），尺寸 1px/mm，Bay 分割线、Upright/BeamX 轮廓、尺寸标注
+- `packages/export/src/svg/dimensions.ts`：SvgDimension 类型、renderDimension() 辅助函数（水平/垂直标注）
+- `packages/export/src/pdf-payload/index.ts`：PdfPayload 构建、BOM CSV 生成、buildPdfPayload() / buildMinimalPdfPayload()
+- `packages/export/src/__fixtures__/fixtures.ts`：simple2Bay fixture、singleBay fixture、DimensionViewModel
+- `packages/export/src/__fixtures__/run-svg-fixtures.ts`：26 项自动化检查（三视图内容、尺寸标注、SVG 规范）
+- TypeScript strict mode 编译通过（tsc --noEmit exit 0）
+- Gate P0-009 自动检查项全部 PASS（26/26 tests passed）
+- **禁止依赖** apps/web（约束满足）
 
 ## 状态定义
 

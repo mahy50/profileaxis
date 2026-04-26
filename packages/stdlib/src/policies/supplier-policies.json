@@ -1,0 +1,35 @@
+[
+  {
+    "supplierId": "SUP-SSW-001",
+    "name": "上海 steelworks 货架型材有限公司",
+    "region": "华东",
+    "leadTimeDays": 14,
+    "minOrderQty": 50,
+    "packRounding": 10,
+    "currency": "CNY",
+    "paymentTerms": "T/T 30% 定金, 70% 发货前",
+    "notes": "主要 upright 和 beam 供应商, ISO9001 认证"
+  },
+  {
+    "supplierId": "SUP-HZL-002",
+    "name": "杭州之力金属制品有限公司",
+    "region": "华东",
+    "leadTimeDays": 10,
+    "minOrderQty": 100,
+    "packRounding": 20,
+    "currency": "CNY",
+    "paymentTerms": "T/T 30% 定金, 70% 发货前",
+    "notes": "角铁和辅助型材供应商"
+  },
+  {
+    "supplierId": "SUP-FAS-003",
+    "name": "Fasten Industrial (Suzhou)",
+    "region": "华东",
+    "leadTimeDays": 7,
+    "minOrderQty": 200,
+    "packRounding": 50,
+    "currency": "CNY",
+    "paymentTerms": "T/T 预付",
+    "notes": "螺栓螺母紧固件供应商, 非标定做"
+  }
+]

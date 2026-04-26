@@ -1,0 +1,21 @@
+{
+  "name": "Case 8: Extra heavy 6-level with rear brace and caster",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 3000, "depthMm": 1000, "heightMm": 2700, "placement": "floor" },
+          "capacity": { "shelfCount": 6, "loadTier": "heavy" },
+          "preferences": { "profileSeries": "U90", "rearBrace": true, "caster": true },
+          "constraints": { "againstWall": true, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 32,
+  "expectedJointCount": 36
+}

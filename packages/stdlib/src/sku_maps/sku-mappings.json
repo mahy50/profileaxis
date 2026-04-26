@@ -1,0 +1,82 @@
+[
+  {
+    "profileSpecKey": "PA-UC90-70-2.5",
+    "connectorSpecKey": "JC3-CORNER",
+    "tradeBomSku": "SSW-UC90-70-2.5-6000",
+    "tradeBomDesc": "UC90系列 立柱 C型材 90×70×2.5mm L=6000mm Q355",
+    "unitCost": 218.00,
+    "currency": "CNY",
+    "unit": "根",
+    "lengthMm": 6000
+  },
+  {
+    "profileSpecKey": "PA-UC90-70-2.5",
+    "connectorSpecKey": "JC3-CORNER",
+    "tradeBomSku": "SSW-UC90-70-2.5-3000",
+    "tradeBomDesc": "UC90系列 立柱 C型材 90×70×2.5mm L=3000mm Q355",
+    "unitCost": 109.00,
+    "currency": "CNY",
+    "unit": "根",
+    "lengthMm": 3000
+  },
+  {
+    "profileSpecKey": "PB-SB60-40-2.0",
+    "connectorSpecKey": "JC3-TEE",
+    "tradeBomSku": "SSW-SB60-40-2.0-2700",
+    "tradeBomDesc": "SB60系列 横梁 C型 step beam 60×40×2.0mm L=2700mm Q355",
+    "unitCost": 87.50,
+    "currency": "CNY",
+    "unit": "根",
+    "lengthMm": 2700
+  },
+  {
+    "profileSpecKey": "PB-SB60-40-2.0",
+    "connectorSpecKey": "JC3-TEE",
+    "tradeBomSku": "SSW-SB60-40-2.0-3300",
+    "tradeBomDesc": "SB60系列 横梁 C型 step beam 60×40×2.0mm L=3300mm Q355",
+    "unitCost": 106.00,
+    "currency": "CNY",
+    "unit": "根",
+    "lengthMm": 3300
+  },
+  {
+    "profileSpecKey": "PC-AI50-50-3",
+    "connectorSpecKey": "JC3-BRACE-END",
+    "tradeBomSku": "HZL-AI50-50-3-40x40",
+    "tradeBomDesc": "AI50系列 等边角铁 50×50×3mm L=40×40m Q235",
+    "unitCost": 56.00,
+    "currency": "CNY",
+    "unit": "根",
+    "lengthMm": 4000
+  },
+  {
+    "profileSpecKey": "PA-UC90-70-2.5",
+    "connectorSpecKey": "JC-FOOT",
+    "tradeBomSku": "SSW-FOOT-UC90",
+    "tradeBomDesc": "UC90系列 立柱底脚 连接板 90×70mm",
+    "unitCost": 18.00,
+    "currency": "CNY",
+    "unit": "个",
+    "lengthMm": null
+  },
+  {
+    "profileSpecKey": "PB-SB60-40-2.0",
+    "connectorSpecKey": "JC3-BRACE-END",
+    "tradeBomSku": "FAS-BOLT-M8x25-10.9",
+    "tradeBomDesc": "M8×25 10.9级高强度螺栓 10.9级镀锌",
+    "unitCost": 1.20,
+    "currency": "CNY",
+    "unit": "套",
+    "lengthMm": null
+  },
+  {
+    "profileSpecKey": "PA-UC90-70-2.5",
+    "connectorSpecKey": "JC4-CROSS",
+    "tradeBomSku": "FAS-BOLT-M10x35-10.9",
+    "tradeBomDesc": "M10×35 10.9级高强度螺栓 10.9级镀锌",
+    "unitCost": 2.10,
+    "currency": "CNY",
+    "unit": "套",
+    "lengthMm": null
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "profileKey": "PB-SB60-40-2.0",
+  "seriesName": "SB60",
+  "crossSection": "C-channel step beam",
+  "dimensions": {
+    "widthMm": 60,
+    "heightMm": 40,
+    "wallThicknessMm": 2.0
+  },
+  "material": "Q355 steel",
+  "weightKgPerM": 2.87,
+  "loadRatingN": 32000,
+  "finishOptions": [
+    {
+      "finishKey": "FZ-pre galvanized",
+      "description": "Pre-galvanized (Z275 g/m²)"
+    },
+    {
+      "finishKey": "PP-RAL5015",
+      "description": "Powder-coated RAL 5015 sky blue"
+    },
+    {
+      "finishKey": "PP-RAL7035",
+      "description": "Powder-coated RAL 7035 light grey"
+    }
+  ]
+}

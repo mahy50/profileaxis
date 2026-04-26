@@ -1,0 +1,21 @@
+{
+  "name": "Case 9: Minimal rack (width=600, depth=400, height=800, shelf=1)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 600, "depthMm": 400, "heightMm": 800, "placement": "floor" },
+          "capacity": { "shelfCount": 1, "loadTier": "light" },
+          "preferences": { "profileSeries": "U50", "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": true, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 10,
+  "expectedJointCount": 8
+}

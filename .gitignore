@@ -4,6 +4,10 @@
 .automation/locks/
 .automation/heartbeats/
 
+node_modules/
+dist/
+build/
+
 # temp
 *.tmp
 *.log

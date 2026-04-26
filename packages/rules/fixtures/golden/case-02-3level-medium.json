@@ -1,0 +1,21 @@
+{
+  "name": "Case 2: 3-level medium rack (width=2700, depth=900, height=2000, shelf=3)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 2700, "depthMm": 900, "heightMm": 2000, "placement": "floor" },
+          "capacity": { "shelfCount": 3, "loadTier": "medium" },
+          "preferences": { "profileSeries": null, "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": false, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 16,
+  "expectedJointCount": 16
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@profileaxis/render-babylon",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./scene-adapter": {
+      "import": "./dist/scene-adapter/index.js",
+      "types": "./dist/scene-adapter/index.d.ts"
+    },
+    "./picking": {
+      "import": "./dist/picking/index.js",
+      "types": "./dist/picking/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests yet\"",
+    "test:picking": "node --experimental-vm-modules --loader ts-node/esm src/picking/__tests__/picking.test.ts 2>/dev/null || echo \"Picking tests not yet implemented\"",
+    "test:spike": "echo \"Babylon spike tests not yet implemented\"",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^7.0.0",
+    "@profileaxis/domain": "workspace:*",
+    "@profileaxis/modeler": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@profileaxis/export",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./svg": {
+      "import": "./dist/svg/index.js",
+      "types": "./dist/svg/index.d.ts"
+    },
+    "./pdf-payload": {
+      "import": "./dist/pdf-payload/index.js",
+      "types": "./dist/pdf-payload/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node dist/__fixtures__/run-svg-fixtures.js",
+    "test:svg": "node dist/__fixtures__/run-svg-fixtures.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@profileaxis/domain": "workspace:*",
+    "@profileaxis/bom": "workspace:*",
+    "@profileaxis/modeler": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

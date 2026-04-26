@@ -1,0 +1,21 @@
+{
+  "name": "Case 5: 5-level high rack (width=3000, depth=800, height=3000, shelf=5)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 3000, "depthMm": 800, "heightMm": 3000, "placement": "floor" },
+          "capacity": { "shelfCount": 5, "loadTier": "medium" },
+          "preferences": { "profileSeries": null, "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": true, "maxWidthMm": 4000 },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 22,
+  "expectedJointCount": 24
+}

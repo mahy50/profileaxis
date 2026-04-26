@@ -1,0 +1,21 @@
+{
+  "name": "Case 6: Small narrow rack (width=1000, depth=500, height=1500, shelf=2)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 1000, "depthMm": 500, "heightMm": 1500, "placement": "floor" },
+          "capacity": { "shelfCount": 2, "loadTier": "light" },
+          "preferences": { "profileSeries": "U50", "rearBrace": false, "caster": false },
+          "constraints": { "againstWall": false, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 12,
+  "expectedJointCount": 14
+}

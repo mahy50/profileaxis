@@ -1,0 +1,101 @@
+Build P0-008: packages/bom
+
+## Task Summary
+Create packages/bom with design BOM / trade BOM dual-chain and SKU mapping.
+
+## Constraints (MUST follow)
+- Allowed dependencies: domain, stdlib
+- Prohibited: apps/web, render-babylon, render layer
+- packages/bom is a pure computation package, no UI/rendering concerns
+- ProjectDocument.resolvedDsl is the source of truth for structuralNodes/joints
+
+## Required Output Structure
+- packages/bom/src/design/index.ts   — design BOM aggregation
+- packages/bom/src/trade/index.ts    — trade BOM with SKU mapping
+- packages/bom/src/mapping/index.ts  — supplier SKU mapping logic
+- packages/bom/src/types.ts          — BOM types (DesignBomItem, TradeBomItem, etc.)
+- packages/bom/src/index.ts          — re-export everything
+
+## Types to Create (in types.ts)
+DesignBomItem:
+  - id: string
+  - kind: structural | joint
+  - role: string
+  - profileSpecKey: string | null
+  - connectorSpecKey: string | null
+  - lengthMm: number | null  (null for joints)
+  - quantity: number
+  - mappingStatus: mapped | unmapped | ambiguous
+  - nodeIds: string[]  (which resolvedDsl nodes this BOM item covers)
+
+TradeBomItem:
+  - sku: string | null
+  - supplierId: string | null
+  - quantity: number
+  - unitPrice: number | null
+  - leadTimeDays: number | null
+  - totalCost: number | null
+  - mappingStatus: mapped | unmapped | ambiguous
+  - designBomItemIds: string[]
+
+SupplierPolicy:
+  - supplierId: string
+  - name: string
+  - moq: number
+  - leadTimeDays: number
+  - priceTiers: Array<{ minQty: number; unitPrice: number }>
+
+SkuMapping:
+  - profileSpecKey: string
+  - sku: string
+  - supplierId: string
+  - unitPrice: number
+  - unit: piece | meter
+
+BomSummary:
+  - designBom: DesignBomItem[]
+  - tradeBom: TradeBomItem[]
+  - designCoverage: number (0-100)
+  - tradeCoverage: number (0-100)
+  - totalDesignCount: number
+  - totalTradeCount: number
+
+## Design BOM Logic
+- Input: resolvedDsl.nodes (StructuralNode[]) + resolvedDsl.joints (JointNode[])
+- Each structural node → one DesignBomItem
+- Each joint node → one DesignBomItem
+- Group by profileSpecKey: aggregate count and total length per profile
+- mappingStatus per BOM line: mapped | unmapped | ambiguous
+
+## Trade BOM Logic
+- Input: DesignBomItem[] + stdlib supplier policies + SKU mapping
+- Map each DesignBomItem to SKU via profileSpecKey → sku_map lookup
+- Apply supplier policy (SSW/HZL/FAS) for MOQ, lead time, price tier
+- Coverage = (mapped items / total items) * 100%
+- Pass threshold: design BOM >= 98%, trade BOM >= 95%
+
+## Steps
+1. Create packages/bom/package.json (name: @profileaxis/bom, dependencies: domain, stdlib)
+2. Create packages/bom/tsconfig.json (strict mode, extends root)
+3. Create packages/bom/src/types.ts with all BOM types above
+4. Create packages/bom/src/design/index.ts — designBomFromResolvedDsl(resolvedDsl): DesignBomItem[]
+5. Create packages/bom/src/trade/index.ts — tradeBomFromDesignBom + applySupplierPolicy
+6. Create packages/bom/src/mapping/index.ts — skuMap lookup, coverage calculation
+7. Create packages/bom/src/index.ts — re-export everything
+8. Create test fixtures in packages/bom/src/__fixtures__/ with at least 3 golden cases
+9. Run tsc --noEmit to verify compilation
+10. Write dist/bom.fixture.json from fixtures
+
+## References
+- domain types: packages/domain/src/project/StructuralNode.ts, packages/domain/src/project/JointNode.ts
+- stdlib: packages/stdlib/src/profiles/, packages/stdlib/src/connectors/
+- SKU map: packages/stdlib/dist/sku-map.json
+- Supplier policies: packages/stdlib/dist/policies/
+- Previous task patterns: see packages/rules/src/ for package conventions
+
+## Important
+- Follow the same package structure conventions as existing packages (rules, modeler)
+- tsconfig.json extends from repo root tsconfig.json
+- Use ES modules, TypeScript strict mode
+- Do NOT add Babylon or Vue dependencies
+- Notify on completion with: openclaw system event --text "Done: P0-008 packages/bom built" --mode now

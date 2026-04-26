@@ -1,0 +1,21 @@
+{
+  "name": "Case 4: Light load, 2 levels with rear brace (width=2000, depth=600, height=1800, shelf=2, rearBrace=true)",
+  "input": {
+    "dslVersion": "1.0.0",
+    "modules": [
+      {
+        "moduleId": "module-0",
+        "kind": "rect-bay",
+        "intent": {
+          "space": { "widthMm": 2000, "depthMm": 600, "heightMm": 1800, "placement": "floor" },
+          "capacity": { "shelfCount": 2, "loadTier": "light" },
+          "preferences": { "profileSeries": "U50", "rearBrace": true, "caster": false },
+          "constraints": { "againstWall": true, "maxWidthMm": null },
+          "ambiguities": []
+        }
+      }
+    ]
+  },
+  "expectedNodeCount": 16,
+  "expectedJointCount": 14
+}

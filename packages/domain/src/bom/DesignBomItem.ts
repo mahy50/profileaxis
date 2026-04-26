@@ -1,16 +1,16 @@
-// DesignBomItem — BOM line item derived from resolvedDsl structural nodes (M1)
+// DesignBomItem — BOM line item derived from resolvedDsl (M1)
+// Aligned with packages/bom types (P0-008)
 
-import type { NodeId } from '../structural/index.js';
+export type MappingStatus = 'mapped' | 'unmapped' | 'ambiguous';
 
 export interface DesignBomItem {
-  itemId: string;
-  nodeId: NodeId;
-  profileSpecKey: string;
-  description: string;
+  id: string;
+  kind: 'structural' | 'joint';
+  role: string;
+  profileSpecKey?: string;
+  connectorSpecKey?: string;
+  lengthMm: number | null;
   quantity: number;
-  unit: 'pcs' | 'm' | 'kg';
-  material: string;
-  lengthMm: number;
-  weightEstimateKg: number | null;
-  semanticPath: string;
+  mappingStatus: MappingStatus;
+  nodeIds: string[];
 }

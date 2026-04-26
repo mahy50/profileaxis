@@ -1,18 +1,13 @@
 // TradeBomItem — BOM line item mapped to supplier catalog SKUs (M1)
-
-export type MappingStatus = 'mapped' | 'unmapped' | 'partial';
+// Aligned with packages/bom types (P0-008)
 
 export interface TradeBomItem {
-  itemId: string;
-  sku: string | null;
-  supplierCode: string;
-  productName: string;
-  description: string;
+  sku: string;
+  supplierId: string;
   quantity: number;
-  unit: 'pcs' | 'm' | 'kg';
-  unitPrice: number | null;
-  currency: string;
-  leadTimeDays: number | null;
-  mappingStatus: MappingStatus;
-  matchedDesignItemIds: string[]; // links to DesignBomItem.itemId
+  unitPrice: number;
+  leadTimeDays: number;
+  totalCost: number;
+  mappingStatus: 'mapped' | 'unmapped' | 'ambiguous';
+  designBomItemIds: string[];
 }

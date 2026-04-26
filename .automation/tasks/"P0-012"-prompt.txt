@@ -1,0 +1,128 @@
+你是 profileaxis 项目的自动化编码助手。请执行以下任务：
+
+## 项目概况
+- 项目: profileaxis — 3D 货架配置平台
+- 仓库: /Users/mahy/projects/profileaxis
+- monorepo: packages/* (10个包) + apps/* (api + web)
+- 语言: TypeScript strict mode, ESM
+- 包管理器: pnpm
+- 测试: vitest / node
+
+## 当前任务: "P0-012"
+
+
+## 验收标准
+(未找到对应 Gate)
+
+## 架构约束
+# 系统架构冻结
+
+## 架构总览
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Browser SPA (apps/web)                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ Chat &       │  │  Editor      │  │  Babylon.js      │  │
+│  │ Confirm UI    │  │  Domain      │  │  Renderer       │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+│         │                  │                   ↑           │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  Project Store │ Selection Store │ Command Bus       │  │
+│  └──────────────────────────────────────────────────────┘  │
+│         ↑                  ↑                   ↑           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ Rule Worker  │  │ BOM Module   │  │  Export Module   │  │
+│  │ (rules)      │  │ (bom)        │  │  (export)       │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                              │ REST API
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│  Backend API (apps/api)                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ AI           │  │ Catalog      │  │  Export Service  │  │
+│  │ Orchestrator │  │ Service      │  │  (PDF)          │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## 真相源定义
+
+**`ProjectDocument.resolvedDsl` 是唯一真相源。**
+
+- 3D 场景只是 `resolvedDsl` 的投影，不是 source of truth
+- 任何时候 Scene 可以从 `ProjectDocument` 完整重建
+- 设计 BOM、交易 BOM、三视图 SVG、PDF 全部从 `resolvedDsl` 派生
+- 快照存储 `resolvedDsl`，不存储 Scene 状态
+
+## 模块职责表
+
+| 模块 | 职责 | 禁止 |
+|---|---|---|
+| `packages/domain` | ProjectDocument、Command、EntityRef、核心枚举、DSL 类型 | 禁止依赖任何 app 或渲染层 |
+| `packages/schemas` | JSON Schema、AI I/O Schema、runtime validator | 禁止依赖 Vue、Babylon、应用服务 |
+| `packages/stdlib` | profile / connector / supplier policy / sku_map / catalog 数据 | 禁止依赖 `apps/*`、`render-babylon` |
+| `packages/rules` | 归一化、拓扑生成、合法化、规格解析、检测 | 禁止依赖渲染层和 UI 层 |
+| `packages/bom` | 设计 BOM、交易 BOM、采购策略、SKU 映射 | 禁止依赖 `apps/web`、`render-babylon` |
+| `packages/modeler` | `resolvedDsl -> geometry / SceneViewModel / DimensionViewModel` | 禁止依赖 Babylon |
+| `packages/render-babylon` | Babylon 适配、picking、高亮、mesh pool、diff 应用器 | 禁止被 `domain/rules/bom/stdlib` 反向引用 |
+| `packages/export` | SVG、CSV、PDF payload | 禁止依赖 `apps/web` |
+| `packages/ai-contracts` | prompt 模板、tool schema、AI DTO、error envelope | 禁止依赖 app 实现 |
+| `apps/web` | Vue 3 UI、Pinia stores、Babylon 集成、IndexedDB、交互层 | 不得被任意 package 导入 |
+| `apps/api` | AI 编排、catalog 下发、PDF 导出、version 服务 | 不得被任意 package 导入 |
+
+## 前后端边界
+
+| 能力 | 前端 | 后端 |
+|---|---|---|
+| 项目真相持有 | ✅ | ❌ |
+| 规则主执行 | ✅（Worker） | 可复算 |
+| 3D 渲染与交互 | ✅ | ❌ |
+| 局部编辑命令执行 | ✅ | ❌ |
+| 设计 BOM 预览 | ✅ | 可复算 |
+| 交易 BOM 预览 | ✅（基于 catalog cache） | 导出时 authoritative |
+| AI 编排 | ❌ | ✅ |
+| catalog ETL / 版本发布 | ❌ | ✅ |
+| PDF 正式导出 | ❌ | ✅ |
+
+## 依赖方向
+
+**固定依赖方向，禁止反向：**
+
+```
+domain / schemas
+      ↓
+stdlib → rules → modeler → render-babylon
+      ↓         ↓
+     bom → export
+      ↓
+  ai-contracts → apps/api
+
+apps/web 依赖所有 shared packages
+```
+
+## 本架构下禁止做的事
+
+1. **禁止** Scene 持有业务真相（`ProjectDocument` 永远是 source of truth）
+2. **禁止** AI 直接输出 `resolvedDsl`、BOM、检测结论或 SKU
+3. **禁止** 前后端各自实现一套 schema/规则，否则 BOM、检测、导出会漂
+4. **禁止** 把 Babylon / Vue 实例写入 `ProjectDocument` 或 Pinia store
+5. **禁止** 在 `apps/web` 外使用 `render-babylon` 包
+6. **禁止** 几何命令直接写文档，只允许语义命令（`resizeBay` / `insertLevel` 等）
+7. **禁止** 在未通过验收门时推进新任务
+
+## 执行规则
+1. 只修改任务范围内的文件
+2. 不破坏现有依赖方向
+3. 完成后运行 typecheck + test 验证
+4. 不要 commit 或 push（由 runner 处理）
+5. 完成后输出结构化的完成报告
+
+## 输出格式
+完成后请输出:
+```
+COMPLETED: "P0-012"
+FILES_CHANGED: <逗号分隔的文件列表>
+SUMMARY: <一句话总结>
+```

@@ -2,16 +2,12 @@
 // Architecture: ONLY depends on @profileaxis/domain. NO apps/* or render-babylon.
 // Contains ONLY static data — NO business logic.
 
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-function loadJson<T>(relativePath: string): T {
-  return JSON.parse(readFileSync(resolve(__dirname, relativePath), 'utf-8')) as T;
-}
+import profileA from './profiles/profile-A-upright-90x70.json' with { type: 'json' };
+import profileB from './profiles/profile-B-beam-60x40.json' with { type: 'json' };
+import profileC from './profiles/profile-C-angle-50x50.json' with { type: 'json' };
+import jointConnectors from './connectors/joint-connectors.json' with { type: 'json' };
+import supplierPolicies from './policies/supplier-policies.json' with { type: 'json' };
+import skuMappings from './sku_maps/sku-mappings.json' with { type: 'json' };
 
 export const STDLIB_VERSION = '1.0.0-m1' as const;
 
@@ -61,27 +57,17 @@ export interface SkuMappingData {
 
 // ── Profile Specs ────────────────────────────────────────────────────────────
 
-const profileA = loadJson<ProfileSpec>('./profiles/profile-A-upright-90x70.json');
-const profileB = loadJson<ProfileSpec>('./profiles/profile-B-beam-60x40.json');
-const profileC = loadJson<ProfileSpec>('./profiles/profile-C-angle-50x50.json');
-
 export const PROFILES: ProfileSpec[] = [profileA, profileB, profileC];
 
 // ── Connector Specs ──────────────────────────────────────────────────────────
-
-const jointConnectors = loadJson<ConnectorSpec[]>('./connectors/joint-connectors.json');
 
 export const CONNECTORS: ConnectorSpec[] = jointConnectors;
 
 // ── Supplier Policies ────────────────────────────────────────────────────────
 
-const supplierPolicies = loadJson<SupplierPolicyData[]>('./policies/supplier-policies.json');
-
 export const SUPPLIER_POLICIES: SupplierPolicyData[] = supplierPolicies;
 
 // ── SKU Mappings ─────────────────────────────────────────────────────────────
-
-const skuMappings = loadJson<SkuMappingData[]>('./sku_maps/sku-mappings.json');
 
 export const SKU_MAPPINGS: SkuMappingData[] = skuMappings;
 

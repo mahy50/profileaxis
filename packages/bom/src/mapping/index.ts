@@ -1,49 +1,8 @@
 // @profileaxis/bom/mapping — SKU → supplier lookup and coverage
 
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve as pathResolve } from 'node:path';
-import type { MappingStatus } from '../types.js';
-import type { DesignBomItem, TradeBomItem, SupplierPolicy, SkuMapping } from '../types.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// ── Stdlib data loading ────────────────────────────────────────────────────────
-// These files are produced by the stdlib build step. Using readFileSync for
-// Node.js ESM compatibility (avoids import assertion issues).
-
-function loadJson<T>(relativePath: string): T {
-  return JSON.parse(readFileSync(pathResolve(__dirname, relativePath), 'utf-8')) as T;
-}
-
-const skuMappingsRaw = loadJson<any[]>('../../../stdlib/dist/sku_maps/sku-mappings.json');
-const supplierPoliciesRaw = loadJson<any[]>('../../../stdlib/dist/policies/supplier-policies.json');
-
-// ── Typed stdlib data ─────────────────────────────────────────────────────────
-
-interface RawSkuMapping {
-  profileSpecKey: string;
-  connectorSpecKey: string;
-  tradeBomSku: string;
-  tradeBomDesc: string;
-  unitCost: number;
-  currency: string;
-  unit: string;
-  lengthMm: number | null;
-}
-
-interface RawSupplierPolicy {
-  supplierId: string;
-  name: string;
-  region: string;
-  leadTimeDays: number;
-  minOrderQty: number;
-  packRounding: number;
-  currency: string;
-  paymentTerms: string;
-  notes?: string;
-}
+import type { MappingStatus, DesignBomItem, TradeBomItem, SupplierPolicy, SkuMapping } from '../types.js';
+import { SKU_MAPPINGS, SUPPLIER_POLICIES } from '@profileaxis/stdlib';
+import type { SkuMappingData, SupplierPolicyData } from '@profileaxis/stdlib';
 
 // Internal extended mapping includes connectorSpecKey for joint lookups
 interface ExtendedSkuMapping {
@@ -55,7 +14,7 @@ interface ExtendedSkuMapping {
   unit: 'piece' | 'meter';
 }
 
-const SKU_MAP: ExtendedSkuMapping[] = (skuMappingsRaw as RawSkuMapping[]).map(m => {
+const SKU_MAP: ExtendedSkuMapping[] = SKU_MAPPINGS.map(m => {
   const prefix = m.tradeBomSku.split('-')[0];
   const supplierId =
     prefix === 'SSW' ? 'SUP-SSW-001' :
@@ -71,8 +30,8 @@ const SKU_MAP: ExtendedSkuMapping[] = (skuMappingsRaw as RawSkuMapping[]).map(m 
   };
 });
 
-const SUPPLIER_POLICIES: Map<string, SupplierPolicy> = new Map(
-  (supplierPoliciesRaw as RawSupplierPolicy[]).map(p => [
+const SUPPLIER_POLICIES_MAP: Map<string, SupplierPolicy> = new Map(
+  SUPPLIER_POLICIES.map(p => [
     p.supplierId,
     {
       supplierId: p.supplierId,
@@ -101,7 +60,7 @@ export function findConnectorSkuMapping(connectorSpecKey: string): SkuMapping | 
 }
 
 export function getSupplierPolicy(supplierId: string): SupplierPolicy | null {
-  return SUPPLIER_POLICIES.get(supplierId) ?? null;
+  return SUPPLIER_POLICIES_MAP.get(supplierId) ?? null;
 }
 
 export function resolveMappingStatus(designItem: DesignBomItem): MappingStatus {

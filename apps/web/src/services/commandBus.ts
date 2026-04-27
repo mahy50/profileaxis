@@ -407,6 +407,39 @@ registerHandler('removeLevel', (dsl, payload) => {
   return { newDsl, inversePayload: { shelfCount: oldShelfCount } };
 });
 
+// ── moveLevel — move a shelf level up/down ─────────────────────────────────
+
+registerHandler('moveLevel', (dsl, payload) => {
+  const p = payload as { levelIndex: number; zMm?: number; deltaZ?: number };
+  const { levelIndex } = p;
+
+  const frontBeam = dsl.nodes.find(n => n.semanticPath === `beam/front/${levelIndex}`);
+  if (!frontBeam) throw new Error(`Level not found: ${levelIndex}`);
+
+  const oldZ = frontBeam.start.z;
+  const newZ = p.zMm ?? (p.deltaZ != null ? oldZ + p.deltaZ : oldZ);
+  const delta = newZ - oldZ;
+
+  const newDsl = deepClone(dsl);
+  if (delta === 0) return { newDsl, inversePayload: { levelIndex, zMm: oldZ } };
+
+  for (const node of newDsl.nodes) {
+    const last = node.semanticPath.split('/').pop();
+    if (last === String(levelIndex)) {
+      node.start.z += delta;
+      node.end.z += delta;
+    }
+  }
+  for (const joint of newDsl.joints) {
+    const last = joint.semanticPath.split('/').pop();
+    if (last === String(levelIndex)) {
+      joint.position.z += delta;
+    }
+  }
+
+  return { newDsl, inversePayload: { levelIndex, zMm: oldZ } };
+});
+
 // ── toggleBrace — toggle rear brace on/off ──────────────────────────────────
 
 registerHandler('toggleBrace', (dsl, payload) => {

@@ -49,7 +49,7 @@ describe('CommandBus', () => {
     const entries: CommandEntry[] = [];
 
     for (let i = 0; i < COMMAND_COUNT; i++) {
-      const mod = i % 6;
+      const mod = i % 7;
       let entry: CommandEntry | undefined;
       const seq = String(i).padStart(2, '0');
 
@@ -73,7 +73,10 @@ describe('CommandBus', () => {
         case 4:
           entry = bus.execute('toggleBrace', {});
           break;
-        case 5: {
+        case 5:
+          entry = bus.execute('moveLevel', { levelIndex: 1, deltaZ: 50 });
+          break;
+        case 6: {
           const dsl = getDsl();
           const modToRemove = dsl.modules.find(m => m.moduleId !== 'bay-1');
           if (modToRemove) {
@@ -165,6 +168,29 @@ describe('CommandBus', () => {
   test('snapshot restore of unknown id returns false', async () => {
     const restored = await bus.restoreSnapshot('nonexistent-id');
     expect(restored).toBe(false);
+  });
+
+  test('moveLevel undo/redo round-trip', () => {
+    const dslBefore = clone(getDsl());
+    // Find level 1 initial Z
+    const frontBeam1 = dslBefore.nodes.find(n => n.semanticPath === 'beam/front/1');
+    expect(frontBeam1).toBeDefined();
+    const oldZ = frontBeam1!.start.z;
+
+    bus.execute('moveLevel', { levelIndex: 1, deltaZ: 100 });
+    const dslAfter = clone(getDsl());
+    const movedBeam = dslAfter.nodes.find(n => n.semanticPath === 'beam/front/1');
+    expect(movedBeam!.start.z).toBeCloseTo(oldZ + 100, 1);
+
+    bus.undo();
+    const dslUndone = clone(getDsl());
+    const undoneBeam = dslUndone.nodes.find(n => n.semanticPath === 'beam/front/1');
+    expect(undoneBeam!.start.z).toBeCloseTo(oldZ, 1);
+    expect(dslsEqual(dslUndone, dslBefore)).toBe(true);
+
+    bus.redo();
+    const dslRedone = clone(getDsl());
+    expect(dslsEqual(dslRedone, dslAfter)).toBe(true);
   });
 
   test('clear removes all history and snapshots', async () => {

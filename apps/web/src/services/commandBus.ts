@@ -45,17 +45,29 @@ function extractResolveParams(dsl: ResolvedDsl): ResolveParams {
   const frontBeams = dsl.nodes.filter(n => n.semanticPath.startsWith('beam/front/'));
   const shelfCount = Math.max(1, frontBeams.length);
 
-  // profileSeries is intentionally NOT extracted from nodes because the
-  // mapping is lossy: null series uses per-type fallbacks (upright vs beam)
-  // that can't be round-tripped through a single series name.  Always use
-  // null here; replaceProfileSeries overrides it explicitly.
+  // Detect profile series from primary structural members (uprights + beams).
+  // When a specific series is active, all primary members share the same
+  // profileSpecKey.  When null (mixed fallback), uprights and beams use
+  // different keys, so the set size will be > 1.
+  const primaryMemberKeys = new Set(
+    dsl.nodes
+      .filter(n => n.role === 'upright' || n.role === 'beamX' || n.role === 'beamY')
+      .map(n => n.profileSpecKey),
+  );
+  let profileSeries: string | null = null;
+  if (primaryMemberKeys.size === 1) {
+    const key = [...primaryMemberKeys][0];
+    if (key === 'PC-AI50-50-3') profileSeries = 'U50';
+    else if (key === 'PB-SB60-40-2.0') profileSeries = 'U60';
+    else if (key === 'PA-UC90-70-2.5') profileSeries = 'U90';
+  }
 
   return {
     widthMm: dsl.overallSizeMm.width,
     depthMm: dsl.overallSizeMm.depth,
     heightMm: dsl.overallSizeMm.height,
     shelfCount,
-    profileSeries: null,
+    profileSeries,
     rearBrace: dsl.nodes.some(n => n.role === 'brace'),
     caster: dsl.nodes.some(n => n.role === 'foot'),
   };
@@ -310,16 +322,38 @@ registerHandler('resizeBay', (dsl, payload) => {
   const mod = dsl.modules.find(m => m.moduleId === moduleId);
   if (!mod) throw new Error(`Module not found: ${moduleId}`);
   const oldSpan = mod.spanMm;
+  const deltaSpan = spanMm - oldSpan;
   const newDsl = deepClone(dsl);
+
+  // Update module span
   const targetMod = newDsl.modules.find(m => m.moduleId === moduleId)!;
   targetMod.spanMm = spanMm;
-  // Update beam lengths for nodes whose semantic path references this module
+
+  // Compute the module's X-range from its position in the bay sequence
+  const moduleIndex = dsl.modules.findIndex(m => m.moduleId === moduleId);
+  let moduleStartX = 0;
+  for (let i = 0; i < moduleIndex; i++) {
+    moduleStartX += dsl.modules[i].spanMm;
+  }
+
+  // Update beamX nodes scoped to this module, and shift downstream nodes
   for (const node of newDsl.nodes) {
-    if (node.role === 'beamX' || node.axis === 'x') {
+    if (node.role === 'beamX' && Math.abs(node.start.x - moduleStartX) < 0.5) {
       node.end.x = node.start.x + spanMm;
       node.lengthMm = spanMm;
     }
+    // Shift nodes in modules to the right of the resized bay
+    if (node.start.x >= moduleStartX + oldSpan - 0.5) {
+      node.start.x += deltaSpan;
+      node.end.x += deltaSpan;
+    }
   }
+  for (const joint of newDsl.joints) {
+    if (joint.position.x >= moduleStartX + oldSpan - 0.5) {
+      joint.position.x += deltaSpan;
+    }
+  }
+
   return { newDsl, inversePayload: { moduleId, spanMm: oldSpan } };
 });
 
@@ -582,14 +616,12 @@ registerHandler('removeBeam', (dsl, payload) => {
 // ── restoreSnapshot — restore a saved snapshot by ID ─────────────────────────
 
 registerHandler('restoreSnapshot', (dsl, payload) => {
-  const p = payload as { dsl?: ResolvedDsl; snapshotId?: string };
-  // Forward: dsl contains the snapshot DSL to restore
-  if (p.dsl != null) {
-    const oldDsl = deepClone(dsl);
-    const newDsl = deepClone(p.dsl);
-    return { newDsl, inversePayload: { dsl: oldDsl } };
-  }
-  // Inverse: dsl contains the pre-restore DSL to go back
-  // (handled identically — swap the DSLs)
-  throw new Error('restoreSnapshot requires a DSL payload');
+  const p = payload as { dsl: ResolvedDsl };
+  // Bidirectional: swap current DSL with payload DSL.
+  // Forward path: payload.dsl is the snapshot target.
+  // Inverse path: payload.dsl is the pre-restore state.
+  if (!p.dsl) throw new Error('restoreSnapshot requires a DSL payload');
+  const oldDsl = deepClone(dsl);
+  const newDsl = deepClone(p.dsl);
+  return { newDsl, inversePayload: { dsl: oldDsl } };
 });

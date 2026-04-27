@@ -21,7 +21,7 @@ export type { JointTopology } from './joint/index.js';
 export type { JointNode } from './joint/JointNode.js';
 
 // ── Command ─────────────────────────────────────────────────────────────────
-export type { CommandSource } from './command/index.js';
+export type { CommandSource, CommandType } from './command/index.js';
 export type { EntityRef } from './command/EntityRef.js';
 export type { CommandEntry } from './command/CommandEntry.js';
 

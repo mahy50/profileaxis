@@ -9,6 +9,7 @@ import { toRaw } from 'vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCommandStore } from '@/stores/commandStore';
 import { createPersistenceStore } from '@/services/persistenceStore';
+import { resolve } from '@profileaxis/rules';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,56 @@ function clonePayload(p: Record<string, unknown>): Record<string, unknown> {
 
 function deepClone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v));
+}
+
+// ── Resolve params helper ────────────────────────────────────────────────────
+
+/**
+ * Extract high-level parameters from a resolved DSL for re-resolution.
+ * Maps profileSpecKey back to series names used by the rules pipeline.
+ */
+interface ResolveParams {
+  widthMm: number;
+  depthMm: number;
+  heightMm: number;
+  shelfCount: number;
+  profileSeries: string | null;
+  rearBrace: boolean;
+  caster: boolean;
+}
+
+function extractResolveParams(dsl: ResolvedDsl): ResolveParams {
+  const frontBeams = dsl.nodes.filter(n => n.semanticPath.startsWith('beam/front/'));
+  const shelfCount = Math.max(1, frontBeams.length);
+
+  // profileSeries is intentionally NOT extracted from nodes because the
+  // mapping is lossy: null series uses per-type fallbacks (upright vs beam)
+  // that can't be round-tripped through a single series name.  Always use
+  // null here; replaceProfileSeries overrides it explicitly.
+
+  return {
+    widthMm: dsl.overallSizeMm.width,
+    depthMm: dsl.overallSizeMm.depth,
+    heightMm: dsl.overallSizeMm.height,
+    shelfCount,
+    profileSeries: null,
+    rearBrace: dsl.nodes.some(n => n.role === 'brace'),
+    caster: dsl.nodes.some(n => n.role === 'foot'),
+  };
+}
+
+/**
+ * Re-resolve the full DSL through the rules pipeline, preserving original modules.
+ * The resolve() function regenerates nodes/joints/overallSizeMm from high-level params.
+ */
+function reResolveDsl(dsl: ResolvedDsl): ResolvedDsl {
+  const params = extractResolveParams(dsl);
+  const resolved = resolve(params);
+  const newDsl = deepClone(dsl);
+  newDsl.nodes = deepClone(resolved.nodes);
+  newDsl.joints = deepClone(resolved.joints);
+  newDsl.overallSizeMm = deepClone(resolved.overallSizeMm);
+  return newDsl;
 }
 
 // ── Handler registry ────────────────────────────────────────────────────────
@@ -133,7 +184,6 @@ export function createCommandBus() {
     snapshots.set(snapshotId, meta);
     projectStore.projectDoc.snapshotIds = [...projectStore.projectDoc.snapshotIds, snapshotId];
 
-    // Persist to IndexedDB (fire-and-forget, errors logged but not thrown)
     persistence.saveSnapshot(snapshotId, revisionId, label, dsl).catch(err => {
       console.warn('[commandBus] Failed to persist snapshot:', err);
     });
@@ -144,12 +194,10 @@ export function createCommandBus() {
   async function restoreSnapshot(snapshotId: string): Promise<boolean> {
     let snap = snapshots.get(snapshotId);
 
-    // Fall back to persisted storage if not in memory
     if (!snap) {
       const persisted = await persistence.loadSnapshot(snapshotId);
       if (!persisted) return false;
       snap = persisted;
-      // Hydrate in-memory cache
       snapshots.set(snapshotId, persisted);
     }
 
@@ -175,14 +223,11 @@ export function createCommandBus() {
   }
 
   async function listSnapshots(): Promise<SnapshotMeta[]> {
-    // Return from in-memory cache (always up-to-date during a session).
-    // For cross-session restored snapshots, use loadPersistedSnapshots().
     return [...snapshots.values()].map(({ snapshotId, revisionId, createdAt, label }) => ({
       snapshotId, revisionId, createdAt, label,
     }));
   }
 
-  // Hydrate in-memory cache from persisted store (call on app startup)
   async function loadPersistedSnapshots(): Promise<void> {
     const persistedMetas = await persistence.listSnapshots();
     for (const pm of persistedMetas) {
@@ -229,7 +274,7 @@ export function createCommandBus() {
   };
 }
 
-// ── Snapshot entry (used only for type) ──────────────────────────────────────
+// ── Snapshot entry ──────────────────────────────────────────────────────────
 
 interface SnapshotEntry {
   snapshotId: string;
@@ -239,20 +284,28 @@ interface SnapshotEntry {
   dsl: ResolvedDsl;
 }
 
-// ── Built-in semantic command handlers ──────────────────────────────────────
-// Each handler MUST handle both its forward payload and its inverse payload.
+// ── Semantic command handlers ───────────────────────────────────────────────
+// All handlers are bidirectional: payload shape determines direction.
+// Command names align with EditAction from @profileaxis/schemas.
 
-registerHandler('setOverallSize', (dsl, payload) => {
+// ── resizeOverall — change overall dimensions ────────────────────────────────
+
+registerHandler('resizeOverall', (dsl, payload) => {
   const oldSize = { ...dsl.overallSizeMm };
   const partial = payload as { width?: number; depth?: number; height?: number };
   const newDsl = deepClone(dsl);
   if (partial.width != null) newDsl.overallSizeMm.width = partial.width;
   if (partial.depth != null) newDsl.overallSizeMm.depth = partial.depth;
   if (partial.height != null) newDsl.overallSizeMm.height = partial.height;
+  // Do NOT re-resolve: resizeOverall is a semantic intent declaration.
+  // Nodes/joints adapt during the next topological command (insertLevel etc.)
+  // or through the modeler's geometry projection.
   return { newDsl, inversePayload: oldSize };
 });
 
-registerHandler('setModuleSpan', (dsl, payload) => {
+// ── resizeBay — change a module bay span ────────────────────────────────────
+
+registerHandler('resizeBay', (dsl, payload) => {
   const { moduleId, spanMm } = payload as { moduleId: string; spanMm: number };
   const mod = dsl.modules.find(m => m.moduleId === moduleId);
   if (!mod) throw new Error(`Module not found: ${moduleId}`);
@@ -260,13 +313,20 @@ registerHandler('setModuleSpan', (dsl, payload) => {
   const newDsl = deepClone(dsl);
   const targetMod = newDsl.modules.find(m => m.moduleId === moduleId)!;
   targetMod.spanMm = spanMm;
+  // Update beam lengths for nodes whose semantic path references this module
+  for (const node of newDsl.nodes) {
+    if (node.role === 'beamX' || node.axis === 'x') {
+      node.end.x = node.start.x + spanMm;
+      node.lengthMm = spanMm;
+    }
+  }
   return { newDsl, inversePayload: { moduleId, spanMm: oldSpan } };
 });
 
-// addModule: forward={moduleId, kind, spanMm} adds; inverse={moduleId} removes
-registerHandler('addModule', (dsl, payload) => {
+// ── insertBay — add a new module bay ─────────────────────────────────────────
+
+registerHandler('insertBay', (dsl, payload) => {
   const p = payload as { moduleId: string; kind?: string; spanMm?: number };
-  // If kind and spanMm are present → add; otherwise → remove (inverse)
   if (p.kind != null && p.spanMm != null) {
     if (dsl.modules.some(m => m.moduleId === p.moduleId)) {
       throw new Error(`Module already exists: ${p.moduleId}`);
@@ -283,10 +343,10 @@ registerHandler('addModule', (dsl, payload) => {
   }
 });
 
-// removeModule: forward={moduleId} removes; inverse={moduleId, kind, spanMm} adds
-registerHandler('removeModule', (dsl, payload) => {
+// ── removeBay — remove a module bay ──────────────────────────────────────────
+
+registerHandler('removeBay', (dsl, payload) => {
   const p = payload as { moduleId: string; kind?: string; spanMm?: number };
-  // If kind and spanMm are present → add (inverse); otherwise → remove
   if (p.kind != null && p.spanMm != null) {
     if (dsl.modules.some(m => m.moduleId === p.moduleId)) {
       throw new Error(`Module already exists: ${p.moduleId}`);
@@ -303,18 +363,200 @@ registerHandler('removeModule', (dsl, payload) => {
   }
 });
 
-registerHandler('setNodes', (dsl, payload) => {
-  const { nodes } = payload as { nodes: ResolvedDsl['nodes'] };
-  const oldNodes = deepClone(dsl.nodes);
+// ── insertLevel — add a shelf level (re-resolution via rules pipeline) ───────
+
+registerHandler('insertLevel', (dsl, payload) => {
+  const params = extractResolveParams(dsl);
+  const oldShelfCount = params.shelfCount;
+
+  const p = payload as { shelfCount?: number };
+  if (p.shelfCount != null) {
+    params.shelfCount = p.shelfCount;
+  } else {
+    params.shelfCount = Math.min(params.shelfCount + 1, 20);
+  }
+
+  const resolved = resolve(params);
   const newDsl = deepClone(dsl);
-  newDsl.nodes = deepClone(nodes);
-  return { newDsl, inversePayload: { nodes: oldNodes } };
+  newDsl.nodes = deepClone(resolved.nodes);
+  newDsl.joints = deepClone(resolved.joints);
+  newDsl.overallSizeMm = deepClone(resolved.overallSizeMm);
+
+  return { newDsl, inversePayload: { shelfCount: oldShelfCount } };
 });
 
-registerHandler('setJoints', (dsl, payload) => {
-  const { joints } = payload as { joints: ResolvedDsl['joints'] };
-  const oldJoints = deepClone(dsl.joints);
+// ── removeLevel — remove a shelf level ──────────────────────────────────────
+
+registerHandler('removeLevel', (dsl, payload) => {
+  const params = extractResolveParams(dsl);
+  const oldShelfCount = params.shelfCount;
+
+  const p = payload as { shelfCount?: number };
+  if (p.shelfCount != null) {
+    params.shelfCount = p.shelfCount;
+  } else {
+    params.shelfCount = Math.max(params.shelfCount - 1, 1);
+  }
+
+  const resolved = resolve(params);
   const newDsl = deepClone(dsl);
-  newDsl.joints = deepClone(joints);
-  return { newDsl, inversePayload: { joints: oldJoints } };
+  newDsl.nodes = deepClone(resolved.nodes);
+  newDsl.joints = deepClone(resolved.joints);
+  newDsl.overallSizeMm = deepClone(resolved.overallSizeMm);
+
+  return { newDsl, inversePayload: { shelfCount: oldShelfCount } };
+});
+
+// ── toggleBrace — toggle rear brace on/off ──────────────────────────────────
+
+registerHandler('toggleBrace', (dsl, payload) => {
+  const params = extractResolveParams(dsl);
+  const oldBrace = params.rearBrace;
+
+  const p = payload as { rearBrace?: boolean };
+  if (p.rearBrace != null) {
+    params.rearBrace = p.rearBrace;
+  } else {
+    params.rearBrace = !params.rearBrace;
+  }
+
+  const resolved = resolve(params);
+  const newDsl = deepClone(dsl);
+  newDsl.nodes = deepClone(resolved.nodes);
+  newDsl.joints = deepClone(resolved.joints);
+  newDsl.overallSizeMm = deepClone(resolved.overallSizeMm);
+
+  return { newDsl, inversePayload: { rearBrace: oldBrace } };
+});
+
+// ── replaceProfileSeries — swap profile series ──────────────────────────────
+
+registerHandler('replaceProfileSeries', (dsl, payload) => {
+  const params = extractResolveParams(dsl);
+  const oldSeries = params.profileSeries;
+
+  const p = payload as { profileSeries?: string | null };
+  if (p.profileSeries !== undefined) {
+    params.profileSeries = p.profileSeries;
+  } else {
+    // Toggle through series: null → U50 → U60 → U90 → null
+    const series = [null, 'U50', 'U60', 'U90'];
+    const idx = series.indexOf(params.profileSeries);
+    params.profileSeries = series[(idx + 1) % series.length];
+  }
+
+  const resolved = resolve(params);
+  const newDsl = deepClone(dsl);
+  newDsl.nodes = deepClone(resolved.nodes);
+  newDsl.joints = deepClone(resolved.joints);
+  newDsl.overallSizeMm = deepClone(resolved.overallSizeMm);
+
+  return { newDsl, inversePayload: { profileSeries: oldSeries } };
+});
+
+// ── addBeam — add a beam at a specific position ─────────────────────────────
+
+registerHandler('addBeam', (dsl, payload) => {
+  const p = payload as {
+    semanticPath?: string; role?: string; axis?: string;
+    start?: { x: number; y: number; z: number };
+    end?: { x: number; y: number; z: number };
+    lengthMm?: number; profileSpecKey?: string;
+  };
+  // Forward: semanticPath is present → add beam
+  if (p.semanticPath != null) {
+    if (dsl.nodes.some(n => n.semanticPath === p.semanticPath)) {
+      throw new Error(`Beam already exists: ${p.semanticPath}`);
+    }
+    const newDsl = deepClone(dsl);
+    const nodeId = `N-${Math.abs(
+      p.semanticPath.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) & 0xffffffff, 0)
+    ).toString(36).padStart(8, '0')}`;
+    newDsl.nodes = [...newDsl.nodes, {
+      nodeId,
+      kind: 'member',
+      role: (p.role as 'beamX' | 'beamY') || 'beamX',
+      semanticPath: p.semanticPath,
+      axis: (p.axis as 'x' | 'y' | 'z') || 'x',
+      start: p.start ?? { x: 0, y: 0, z: 0 },
+      end: p.end ?? { x: p.lengthMm ?? 0, y: 0, z: 0 },
+      lengthMm: p.lengthMm ?? 0,
+      profileSpecKey: p.profileSpecKey ?? 'PB-SB60-40-2.0',
+      provenance: { source: 'user', ruleIds: [] },
+      finishKey: 'FZ-pre galvanized',
+      tags: [],
+    }];
+    return { newDsl, inversePayload: { semanticPath: p.semanticPath } };
+  }
+  // Inverse: semanticPath is absent → remove beam
+  const removePath = (payload as { semanticPath: string }).semanticPath;
+  const existing = dsl.nodes.find(n => n.semanticPath === removePath);
+  if (!existing) throw new Error(`Beam not found: ${removePath}`);
+  const newDsl = deepClone(dsl);
+  newDsl.nodes = newDsl.nodes.filter(n => n.semanticPath !== removePath);
+  return {
+    newDsl,
+    inversePayload: {
+      semanticPath: existing.semanticPath, role: existing.role, axis: existing.axis,
+      start: existing.start, end: existing.end, lengthMm: existing.lengthMm,
+      profileSpecKey: existing.profileSpecKey,
+    },
+  };
+});
+
+// ── removeBeam — remove a beam ──────────────────────────────────────────────
+
+registerHandler('removeBeam', (dsl, payload) => {
+  const p = payload as { semanticPath?: string; role?: string; axis?: string;
+    start?: { x: number; y: number; z: number }; end?: { x: number; y: number; z: number };
+    lengthMm?: number; profileSpecKey?: string; };
+  if (p.semanticPath != null && p.role != null) {
+    // Inverse: restore beam
+    const newDsl = deepClone(dsl);
+    const nodeId = `N-${Math.abs(
+      p.semanticPath.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) & 0xffffffff, 0)
+    ).toString(36).padStart(8, '0')}`;
+    newDsl.nodes = [...newDsl.nodes, {
+      nodeId, kind: 'member',
+      role: p.role as 'beamX' | 'beamY',
+      semanticPath: p.semanticPath,
+      axis: (p.axis as 'x' | 'y' | 'z') || 'x',
+      start: p.start ?? { x: 0, y: 0, z: 0 },
+      end: p.end ?? { x: p.lengthMm ?? 0, y: 0, z: 0 },
+      lengthMm: p.lengthMm ?? 0,
+      profileSpecKey: p.profileSpecKey ?? 'PB-SB60-40-2.0',
+      provenance: { source: 'user', ruleIds: [] },
+      finishKey: 'FZ-pre galvanized', tags: [],
+    }];
+    return { newDsl, inversePayload: { semanticPath: p.semanticPath } };
+  }
+  // Forward: remove beam
+  const removePath = (payload as { semanticPath: string }).semanticPath;
+  const existing = dsl.nodes.find(n => n.semanticPath === removePath);
+  if (!existing) throw new Error(`Beam not found: ${removePath}`);
+  const newDsl = deepClone(dsl);
+  newDsl.nodes = newDsl.nodes.filter(n => n.semanticPath !== removePath);
+  return {
+    newDsl,
+    inversePayload: {
+      semanticPath: existing.semanticPath, role: existing.role, axis: existing.axis,
+      start: existing.start, end: existing.end, lengthMm: existing.lengthMm,
+      profileSpecKey: existing.profileSpecKey,
+    },
+  };
+});
+
+// ── restoreSnapshot — restore a saved snapshot by ID ─────────────────────────
+
+registerHandler('restoreSnapshot', (dsl, payload) => {
+  const p = payload as { dsl?: ResolvedDsl; snapshotId?: string };
+  // Forward: dsl contains the snapshot DSL to restore
+  if (p.dsl != null) {
+    const oldDsl = deepClone(dsl);
+    const newDsl = deepClone(p.dsl);
+    return { newDsl, inversePayload: { dsl: oldDsl } };
+  }
+  // Inverse: dsl contains the pre-restore DSL to go back
+  // (handled identically — swap the DSLs)
+  throw new Error('restoreSnapshot requires a DSL payload');
 });

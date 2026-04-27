@@ -10,7 +10,7 @@ import type {
   CheckIssue,
 } from '@profileaxis/domain';
 import { computeBomSummary } from '@profileaxis/bom';
-import { check } from '@profileaxis/rules';
+import { check, resolve } from '@profileaxis/rules';
 
 export interface ProjectStoreState {
   projectDoc: Ref<ProjectDocument>;
@@ -36,6 +36,23 @@ export interface ProjectStoreState {
 }
 
 function makeEmptyProject(): ProjectDocument {
+  // Pre-resolve the default rack to populate nodes and joints via the rules pipeline.
+  // This ensures the initial state is always a valid resolved Dsl (not empty nodes).
+  const defaultParams = {
+    widthMm: 1200,
+    depthMm: 600,
+    heightMm: 2000,
+    shelfCount: 3,
+    profileSeries: null as string | null,
+    rearBrace: false,
+    caster: false,
+  };
+  const resolved = resolve(defaultParams);
+  // Use the standard module id expected by tests and UI
+  if (resolved.modules.length > 0) {
+    resolved.modules[0].moduleId = 'bay-1';
+  }
+
   return {
     schemaVersion: '1.0.0',
     projectId: `proj-${Date.now()}`,
@@ -45,17 +62,9 @@ function makeEmptyProject(): ProjectDocument {
     stdlibVersion: '1.0.0-m1',
     ruleVersion: '1.0.0-m1',
     catalogVersion: '1.0.0-m1',
-    resolvedDsl: {
-      dslVersion: '1.0.0',
-      projectType: 'storage_rack',
-      sourceRevisionId: 'init',
-      overallSizeMm: { width: 1200, depth: 600, height: 2000 },
-      modules: [{ moduleId: 'bay-1', kind: 'rect-bay', spanMm: 1200 }],
-      nodes: [],
-      joints: [],
-    },
-    structuralNodes: [],
-    jointNodes: [],
+    resolvedDsl: resolved,
+    structuralNodes: [...resolved.nodes],
+    jointNodes: [...resolved.joints],
     designBom: [],
     tradeBom: [],
     checkIssues: [],

@@ -12,7 +12,6 @@ function parseCountArg(): number {
     const n = parseInt(argv[idx + 1], 10);
     if (!isNaN(n) && n > 0) return n;
   }
-  // Fall back to COUNT env var
   const env = parseInt(process.env.COUNT ?? '', 10);
   if (!isNaN(env) && env > 0) return env;
   return 20;
@@ -56,60 +55,31 @@ describe('CommandBus', () => {
 
       switch (mod) {
         case 0:
-          entry = bus.execute('setOverallSize', { width: 1200 + i * 10 });
+          entry = bus.execute('resizeOverall', { width: 1200 + i * 10 });
           break;
         case 1:
-          entry = bus.execute('setModuleSpan', { moduleId: 'bay-1', spanMm: 1200 + i * 10 });
+          entry = bus.execute('resizeBay', { moduleId: 'bay-1', spanMm: 1200 + i * 10 });
           break;
         case 2:
-          entry = bus.execute('addModule', {
+          entry = bus.execute('insertBay', {
             moduleId: `bay-${seq}`,
             kind: 'rect-bay',
             spanMm: 800 + i * 5,
           });
           break;
         case 3:
-          entry = bus.execute('setNodes', {
-            nodes: [
-              {
-                nodeId: `node-${seq}`,
-                kind: 'member' as const,
-                role: 'upright' as const,
-                semanticPath: '/bay-1/left-upright',
-                axis: 'z' as const,
-                start: { x: 0, y: 0, z: 0 },
-                end: { x: 0, y: 2000, z: 0 },
-                lengthMm: 2000,
-                profileSpecKey: 'U50-30x30',
-                provenance: { source: 'user' as const, ruleIds: [] },
-                finishKey: null,
-                tags: [],
-              },
-            ],
-          });
+          entry = bus.execute('insertLevel', {});
           break;
         case 4:
-          entry = bus.execute('setJoints', {
-            joints: [
-              {
-                jointId: `joint-${seq}`,
-                topology: 'corner-3way' as const,
-                semanticPath: '/bay-1/corner-0',
-                position: { x: 0, y: 0, z: 0 },
-                memberIds: [],
-                connectorSpecKey: 'conn-corner-standard',
-                connectorFamilyKey: 'corner',
-              },
-            ],
-          });
+          entry = bus.execute('toggleBrace', {});
           break;
         case 5: {
           const dsl = getDsl();
           const modToRemove = dsl.modules.find(m => m.moduleId !== 'bay-1');
           if (modToRemove) {
-            entry = bus.execute('removeModule', { moduleId: modToRemove.moduleId });
+            entry = bus.execute('removeBay', { moduleId: modToRemove.moduleId });
           } else {
-            entry = bus.execute('setOverallSize', { depth: 600 + i * 10 });
+            entry = bus.execute('resizeOverall', { depth: 600 + i * 10 });
           }
           break;
         }
@@ -145,9 +115,9 @@ describe('CommandBus', () => {
     const snapMeta = await bus.saveSnapshot('initial');
     const dslBefore = clone(getDsl());
 
-    bus.execute('setOverallSize', { width: 1500 });
-    bus.execute('setModuleSpan', { moduleId: 'bay-1', spanMm: 1500 });
-    bus.execute('addModule', { moduleId: 'bay-2', kind: 'rect-bay', spanMm: 800 });
+    bus.execute('resizeOverall', { width: 1500 });
+    bus.execute('resizeBay', { moduleId: 'bay-1', spanMm: 1500 });
+    bus.execute('insertBay', { moduleId: 'bay-2', kind: 'rect-bay', spanMm: 800 });
 
     expect(dslsEqual(getDsl(), dslBefore)).toBe(false);
 
@@ -183,7 +153,7 @@ describe('CommandBus', () => {
     const dslBefore = clone(getDsl());
 
     // Mutate state
-    bus.execute('setOverallSize', { width: 9999 });
+    bus.execute('resizeOverall', { width: 9999 });
     expect(dslsEqual(getDsl(), dslBefore)).toBe(false);
 
     // Restore (should work from in-memory cache)
@@ -198,7 +168,7 @@ describe('CommandBus', () => {
   });
 
   test('clear removes all history and snapshots', async () => {
-    bus.execute('setOverallSize', { width: 2000 });
+    bus.execute('resizeOverall', { width: 2000 });
     await bus.saveSnapshot('before-clear');
     expect(bus.getHistory()).toHaveLength(1);
 

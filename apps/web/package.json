@@ -7,8 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "test": "echo \"No tests yet\"",
-    "test:commands": "echo \"Command tests not yet implemented\"",
+    "test": "vitest run",
+    "test:commands": "vitest run src/__tests__/commandBus.test.ts",
     "test:persistence": "echo \"Persistence tests not yet implemented\"",
     "clean": "rm -rf dist"
   },
@@ -30,6 +30,7 @@
     "@vitejs/plugin-vue": "^5.0.0",
     "typescript": "^5.4.0",
     "vite": "^5.2.0",
+    "vitest": "^1.6.1",
     "vue-tsc": "^2.0.0",
     "@types/node": "^20.0.0"
   }

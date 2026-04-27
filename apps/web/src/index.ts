@@ -14,6 +14,8 @@ export { useCatalog, getCatalog } from './composables/useCatalog';
 
 // Services
 export { api } from './services/api';
+export { createCommandBus, registerHandler } from './services/commandBus';
+export type { CommandHandler } from './services/commandBus';
 
 // Components
 export {

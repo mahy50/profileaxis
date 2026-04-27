@@ -25,7 +25,7 @@
 | P0-010 | 建立 packages/ai-contracts | prompts、tool schema、AI DTO、error envelope | P0-002 | `packages/schemas` | `packages/ai-contracts/src/prompts/`、`packages/ai-contracts/src/tools/` | 所有 tool schema 符合 M1 冻结要求 | completed |
 | P0-011 | 建立 apps/api AI endpoints | `intent / draft / edit-intent / check-explain` 四个 endpoint | P0-005, P0-010 | `packages/rules + ai-contracts` | `apps/api/src/routes/`、`apps/api/src/services/ai-orchestrator/` | 接口返回 strict schema 合法结果 | completed || completed |
 | P0-012 | 建立 apps/web 编辑器壳层 | Vue 3 + Pinia + Babylon 集成 + IndexedDB | P0-007, P0-008, P0-011 | `packages/render-babylon + bom + api` | `apps/web/src/stores/`、`apps/web/src/features/editor/` | Scene / 结构树 / 选择同步可用 | completed || completed |
-| P0-013 | 命令系统 | 语义命令、撤销/重做、快照恢复 | P0-003 | `packages/domain` | command bus、persistence store | 20 次编辑内历史一致；snapshot restore 后全部一致 | queued |
+| P0-013 | 命令系统 | 语义命令、撤销/重做、快照恢复 | P0-003 | `packages/domain` | command bus、persistence store |completed| queued |
 | P0-014 | 本地持久化底座 | IndexedDB projects / snapshots / commands | P0-003 | `packages/domain` | IndexedDB repo、snapshot repo | 刷新后可恢复最近项目 | queued |
 
 ### P1 任务（首版闭环，不阻断发布）

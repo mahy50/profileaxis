@@ -5,19 +5,21 @@ import BomPanel from './BomPanel.vue';
 import ChecksPanel from './ChecksPanel.vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCommandStore } from '@/stores/commandStore';
+import { createCommandBus } from '@/services/commandBus';
 
 const projectStore = useProjectStore();
 const commandStore = useCommandStore();
+const bus = createCommandBus();
 
 type PanelTab = 'tree' | 'bom' | 'checks';
 
 const activeTab = ref<PanelTab>('tree');
 
 function handleUndo() {
-  commandStore.undo();
+  bus.undo();
 }
 function handleRedo() {
-  commandStore.redo();
+  bus.redo();
 }
 </script>
 

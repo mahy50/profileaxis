@@ -14,7 +14,7 @@
 依赖: P0-003
 输入: `packages/domain`
 输出: command bus、persistence store
-验收: 20 次编辑内历史一致；snapshot restore 后全部一致
+验收: completed
 
 ## 验收标准
 ### Gate P0-013：命令系统

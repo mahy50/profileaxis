@@ -4,7 +4,21 @@ import { useProjectStore } from '@/stores/projectStore';
 import { createCommandBus } from '@/services/commandBus';
 import type { ResolvedDsl, CommandEntry } from '@profileaxis/domain';
 
-const COMMAND_COUNT = parseInt(process.env.COUNT ?? '20', 10);
+// Parse --count N from CLI args (supports: pnpm test:commands --count 20)
+function parseCountArg(): number {
+  const argv = process.argv;
+  const idx = argv.findIndex(a => a === '--count');
+  if (idx >= 0 && idx + 1 < argv.length) {
+    const n = parseInt(argv[idx + 1], 10);
+    if (!isNaN(n) && n > 0) return n;
+  }
+  // Fall back to COUNT env var
+  const env = parseInt(process.env.COUNT ?? '', 10);
+  if (!isNaN(env) && env > 0) return env;
+  return 20;
+}
+
+const COMMAND_COUNT = parseCountArg();
 
 function clone(dsl: ResolvedDsl): ResolvedDsl {
   return JSON.parse(JSON.stringify(dsl));
@@ -35,7 +49,6 @@ describe('CommandBus', () => {
     const dslBefore = clone(getDsl());
     const entries: CommandEntry[] = [];
 
-    // Build a varied command sequence by cycling through command types
     for (let i = 0; i < COMMAND_COUNT; i++) {
       const mod = i % 6;
       let entry: CommandEntry | undefined;
@@ -91,7 +104,6 @@ describe('CommandBus', () => {
           });
           break;
         case 5: {
-          // Remove a module (skip when we only have bay-1)
           const dsl = getDsl();
           const modToRemove = dsl.modules.find(m => m.moduleId !== 'bay-1');
           if (modToRemove) {
@@ -106,7 +118,6 @@ describe('CommandBus', () => {
       if (entry) entries.push(entry);
     }
 
-    // Verify history length
     const actualCount = entries.length;
     expect(bus.getHistory()).toHaveLength(actualCount);
     expect(bus.getCursor()).toBe(actualCount);
@@ -118,7 +129,6 @@ describe('CommandBus', () => {
       bus.undo();
     }
 
-    // After undoing all, should match original state
     expect(bus.getCursor()).toBe(0);
     expect(dslsEqual(getDsl(), dslBefore)).toBe(true);
 
@@ -127,46 +137,76 @@ describe('CommandBus', () => {
       bus.redo();
     }
 
-    // After redoing all, should match final state
     expect(bus.getCursor()).toBe(actualCount);
     expect(dslsEqual(getDsl(), dslAfter)).toBe(true);
   });
 
-  test('snapshot save and restore produces identical state', () => {
-    // Save initial snapshot
-    const snapMeta = bus.saveSnapshot('initial');
+  test('snapshot save and restore produces identical state', async () => {
+    const snapMeta = await bus.saveSnapshot('initial');
     const dslBefore = clone(getDsl());
 
-    // Execute a few commands
     bus.execute('setOverallSize', { width: 1500 });
     bus.execute('setModuleSpan', { moduleId: 'bay-1', spanMm: 1500 });
     bus.execute('addModule', { moduleId: 'bay-2', kind: 'rect-bay', spanMm: 800 });
 
-    // State should be different
     expect(dslsEqual(getDsl(), dslBefore)).toBe(false);
 
-    // Restore snapshot
-    const restored = bus.restoreSnapshot(snapMeta.snapshotId);
+    const restored = await bus.restoreSnapshot(snapMeta.snapshotId);
     expect(restored).toBe(true);
 
-    // After restore, state should match original
     expect(dslsEqual(getDsl(), dslBefore)).toBe(true);
 
-    // Snapshot DSL should also match
+    // getSnapshotDsl returns cached; getSnapshotDslAsync also checks persistence
     const snapDsl = bus.getSnapshotDsl(snapMeta.snapshotId);
     expect(snapDsl).not.toBeNull();
     expect(dslsEqual(snapDsl!, dslBefore)).toBe(true);
+
+    const asyncDsl = await bus.getSnapshotDslAsync(snapMeta.snapshotId);
+    expect(asyncDsl).not.toBeNull();
+    expect(dslsEqual(asyncDsl!, dslBefore)).toBe(true);
   });
 
-  test('snapshot list returns all saved snapshots', () => {
-    bus.saveSnapshot('first');
-    bus.saveSnapshot('second');
-    bus.saveSnapshot('third');
+  test('snapshot list returns all saved snapshots', async () => {
+    await bus.saveSnapshot('first');
+    await bus.saveSnapshot('second');
+    await bus.saveSnapshot('third');
 
-    const list = bus.listSnapshots();
+    const list = await bus.listSnapshots();
     expect(list).toHaveLength(3);
     expect(list[0].label).toBe('first');
     expect(list[1].label).toBe('second');
     expect(list[2].label).toBe('third');
+  });
+
+  test('snapshot restore from persistence fallback', async () => {
+    const snapMeta = await bus.saveSnapshot('persisted');
+    const dslBefore = clone(getDsl());
+
+    // Mutate state
+    bus.execute('setOverallSize', { width: 9999 });
+    expect(dslsEqual(getDsl(), dslBefore)).toBe(false);
+
+    // Restore (should work from in-memory cache)
+    const restored = await bus.restoreSnapshot(snapMeta.snapshotId);
+    expect(restored).toBe(true);
+    expect(dslsEqual(getDsl(), dslBefore)).toBe(true);
+  });
+
+  test('snapshot restore of unknown id returns false', async () => {
+    const restored = await bus.restoreSnapshot('nonexistent-id');
+    expect(restored).toBe(false);
+  });
+
+  test('clear removes all history and snapshots', async () => {
+    bus.execute('setOverallSize', { width: 2000 });
+    await bus.saveSnapshot('before-clear');
+    expect(bus.getHistory()).toHaveLength(1);
+
+    await bus.clear();
+    expect(bus.getHistory()).toHaveLength(0);
+    expect(bus.getCursor()).toBe(0);
+
+    const list = await bus.listSnapshots();
+    expect(list).toHaveLength(0);
   });
 });

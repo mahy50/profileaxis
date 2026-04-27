@@ -16,6 +16,8 @@ export { useCatalog, getCatalog } from './composables/useCatalog';
 export { api } from './services/api';
 export { createCommandBus, registerHandler } from './services/commandBus';
 export type { CommandHandler } from './services/commandBus';
+export { createPersistenceStore } from './services/persistenceStore';
+export type { PersistenceStore, PersistedSnapshot } from './services/persistenceStore';
 
 // Components
 export {

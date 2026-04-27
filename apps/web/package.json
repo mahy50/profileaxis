@@ -8,8 +8,8 @@
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
-    "test:commands": "vitest run src/__tests__/commandBus.test.ts",
-    "test:persistence": "echo \"Persistence tests not yet implemented\"",
+    "test:commands": "node scripts/runTestCommands.mjs",
+    "test:persistence": "vitest run src/__tests__/commandBus.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

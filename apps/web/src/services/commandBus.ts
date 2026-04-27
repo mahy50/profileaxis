@@ -8,6 +8,7 @@ import type {
 import { toRaw } from 'vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCommandStore } from '@/stores/commandStore';
+import { createPersistenceStore } from '@/services/persistenceStore';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ let seq = 0;
 export function createCommandBus() {
   const projectStore = useProjectStore();
   const commandStore = useCommandStore();
+  const persistence = createPersistenceStore();
   const snapshots = new Map<string, SnapshotEntry>();
   let snapSeq = 0;
 
@@ -120,24 +122,36 @@ export function createCommandBus() {
     return entry;
   }
 
-  function saveSnapshot(label: string): SnapshotMeta {
+  async function saveSnapshot(label: string): Promise<SnapshotMeta> {
     const timestamp = Date.now();
     const snapshotId = `snap-${seq}-${timestamp}-${++snapSeq}`;
-    const meta: SnapshotEntry = {
-      snapshotId,
-      revisionId: projectStore.projectDoc.currentRevisionId,
-      createdAt: new Date().toISOString(),
-      label,
-      dsl: cloneDsl(projectStore.resolvedDsl),
-    };
+    const dsl = cloneDsl(projectStore.resolvedDsl);
+    const revisionId = projectStore.projectDoc.currentRevisionId;
+    const createdAt = new Date().toISOString();
+
+    const meta: SnapshotEntry = { snapshotId, revisionId, createdAt, label, dsl };
     snapshots.set(snapshotId, meta);
     projectStore.projectDoc.snapshotIds = [...projectStore.projectDoc.snapshotIds, snapshotId];
-    return { snapshotId: meta.snapshotId, revisionId: meta.revisionId, createdAt: meta.createdAt, label: meta.label };
+
+    // Persist to IndexedDB (fire-and-forget, errors logged but not thrown)
+    persistence.saveSnapshot(snapshotId, revisionId, label, dsl).catch(err => {
+      console.warn('[commandBus] Failed to persist snapshot:', err);
+    });
+
+    return { snapshotId, revisionId, createdAt, label };
   }
 
-  function restoreSnapshot(snapshotId: string): boolean {
-    const snap = snapshots.get(snapshotId);
-    if (!snap) return false;
+  async function restoreSnapshot(snapshotId: string): Promise<boolean> {
+    let snap = snapshots.get(snapshotId);
+
+    // Fall back to persisted storage if not in memory
+    if (!snap) {
+      const persisted = await persistence.loadSnapshot(snapshotId);
+      if (!persisted) return false;
+      snap = persisted;
+      // Hydrate in-memory cache
+      snapshots.set(snapshotId, persisted);
+    }
 
     projectStore.updateResolvedDsl(cloneDsl(snap.dsl));
     projectStore.projectDoc.currentRevisionId = snap.revisionId;
@@ -149,13 +163,36 @@ export function createCommandBus() {
     return snapshots.get(snapshotId)?.dsl ?? null;
   }
 
-  function listSnapshots(): SnapshotMeta[] {
+  async function getSnapshotDslAsync(snapshotId: string): Promise<ResolvedDsl | null> {
+    const cached = snapshots.get(snapshotId)?.dsl;
+    if (cached) return cached;
+    const persisted = await persistence.loadSnapshot(snapshotId);
+    if (persisted) {
+      snapshots.set(snapshotId, persisted);
+      return persisted.dsl;
+    }
+    return null;
+  }
+
+  async function listSnapshots(): Promise<SnapshotMeta[]> {
+    // Return from in-memory cache (always up-to-date during a session).
+    // For cross-session restored snapshots, use loadPersistedSnapshots().
     return [...snapshots.values()].map(({ snapshotId, revisionId, createdAt, label }) => ({
-      snapshotId,
-      revisionId,
-      createdAt,
-      label,
+      snapshotId, revisionId, createdAt, label,
     }));
+  }
+
+  // Hydrate in-memory cache from persisted store (call on app startup)
+  async function loadPersistedSnapshots(): Promise<void> {
+    const persistedMetas = await persistence.listSnapshots();
+    for (const pm of persistedMetas) {
+      if (!snapshots.has(pm.snapshotId)) {
+        const full = await persistence.loadSnapshot(pm.snapshotId);
+        if (full) {
+          snapshots.set(pm.snapshotId, full);
+        }
+      }
+    }
   }
 
   function getHistory(): CommandEntry[] {
@@ -166,11 +203,14 @@ export function createCommandBus() {
     return commandStore.cursor;
   }
 
-  function clear(): void {
+  async function clear(): Promise<void> {
     commandStore.clear();
     snapshots.clear();
     projectStore.projectDoc.snapshotIds = [];
     projectStore.projectDoc.commandCursor = 0;
+    await persistence.clearSnapshots().catch(err => {
+      console.warn('[commandBus] Failed to clear persisted snapshots:', err);
+    });
   }
 
   return {
@@ -180,7 +220,9 @@ export function createCommandBus() {
     saveSnapshot,
     restoreSnapshot,
     getSnapshotDsl,
+    getSnapshotDslAsync,
     listSnapshots,
+    loadPersistedSnapshots,
     getHistory,
     getCursor,
     clear,

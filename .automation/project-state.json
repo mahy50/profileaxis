@@ -2,9 +2,9 @@
   "schemaVersion": "1.0.0",
   "activeTaskId": null,
   "activeRunId": null,
-  "lastCompletedTaskId": "$task_id",
+  "lastCompletedTaskId": "P0-013",
   "lastRunStatus": "completed",
-  "lastHeartbeatAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "lastHeartbeatAt": "2026-04-27T03:35:29Z",
   "retryBudget": {
     "P0-001": {
       "attempts": 1,
@@ -55,7 +55,7 @@
       "lastStatus": "completed"
     },
     "P0-013": {
-      "attempts": 3,
+      "attempts": 1,
       "lastStatus": "completed"
     },
     "P0-014": {

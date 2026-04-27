@@ -246,12 +246,12 @@ PROMPT
 EOF
 
     # 更新 project-state
-    json_set "lastCompletedTaskId" '"$task_id"'
+    json_set "lastCompletedTaskId" "\"$task_id\""
     json_set "activeTaskId" "null"
     json_set "activeRunId" "null"
-    json_set "lastRunStatus" '"completed"'
-    json_set "lastHeartbeatAt" '"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'
-    json_set "retryBudget.$task_id.lastStatus" '"completed"'
+    json_set "lastRunStatus" "\"completed\""
+    json_set "lastHeartbeatAt" "\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
+    json_set "retryBudget.$task_id.lastStatus" "\"completed\""
 
     # 更新 task-board 状态
     python3 -c "
@@ -285,7 +285,7 @@ with open('$TASK_BOARD', 'w') as f:
     write_heartbeat "$task_id" "failed"
     
     # 记录失败
-    json_set "retryBudget.$task_id.lastStatus" '"failed"'
+    json_set "retryBudget.$task_id.lastStatus" "\"failed\""
     attempts=$(json_get "d['retryBudget']['$task_id']['attempts']")
     [[ "$attempts" == "null" ]] && attempts=0
     attempts=$((attempts + 1))

@@ -9,7 +9,7 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:commands": "node scripts/runTestCommands.mjs",
-    "test:persistence": "vitest run src/__tests__/commandBus.test.ts",
+    "test:persistence": "vitest run src/__tests__/commandBus.test.ts src/__tests__/persistenceService.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

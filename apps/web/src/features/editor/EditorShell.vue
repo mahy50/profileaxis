@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import Viewport3D from './Viewport3D.vue';
 import StructureTree from './StructureTree.vue';
 import BomPanel from './BomPanel.vue';
@@ -6,6 +7,10 @@ import ChecksPanel from './ChecksPanel.vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCommandStore } from '@/stores/commandStore';
 import { createCommandBus } from '@/services/commandBus';
+
+defineOptions({
+  name: 'EditorShell',
+});
 
 const projectStore = useProjectStore();
 const commandStore = useCommandStore();
@@ -21,11 +26,6 @@ function handleUndo() {
 function handleRedo() {
   bus.redo();
 }
-</script>
-
-<script lang="ts">
-import { ref } from 'vue';
-export default { name: 'EditorShell' };
 </script>
 
 <template>

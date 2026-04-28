@@ -265,8 +265,8 @@ new_lines = []
 for l in lines:
     if l.startswith('| $task_id '):
         cols = l.split('|')
-        if len(cols) >= 8:
-            cols[7] = 'completed'
+        if len(cols) >= 9:
+            cols[8] = ' completed |'
         l = '|'.join(cols)
     new_lines.append(l)
 with open('$TASK_BOARD', 'w') as f:

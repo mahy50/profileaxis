@@ -2,7 +2,7 @@
 // Thin-instance picking for Babylon Scene.
 // Supports picking by screen coordinates, filtering, and multi-pick.
 
-import type { Scene } from '@babylonjs/core';
+import { Vector3, Ray, type Scene } from '@babylonjs/core';
 import type { PickResult, PickingOptions } from '../types.js';
 
 /**
@@ -99,8 +99,6 @@ export function pickRay(
   options?: PickingOptions,
   maxDistance = Infinity,
 ): PickResult {
-  const { Vector3, Ray } = require('@babylonjs/core');
-
   const pickPredicate = (mesh: import('@babylonjs/core').AbstractMesh) => {
     if (!mesh.isPickable || !mesh.isVisible) return false;
     if (options?.filterIds && options.filterIds.length > 0) {

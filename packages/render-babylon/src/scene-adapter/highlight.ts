@@ -2,7 +2,7 @@
 // Babylon HighlightLayer integration.
 // Manages selected/hovered/highlighted/error states on meshes.
 
-import type { Scene, Mesh } from '@babylonjs/core';
+import { HighlightLayer, Color3, type Scene, type Mesh } from '@babylonjs/core';
 import type { HighlightState } from '../types.js';
 
 export interface HighlightLayerManager {
@@ -31,8 +31,6 @@ export function createHighlightLayerManager(
     hoveredColor = '#fff59d',
   } = options;
 
-  // Dynamic import to keep Babylon types isolated to this file
-  const { HighlightLayer, Color3 } = require('@babylonjs/core');
   const highlightLayer = new HighlightLayer('highlightLayer', scene, { isStroke: false });
 
   // Track current state

@@ -233,6 +233,18 @@ PROMPT
       warn "typecheck 有警告"
     fi
 
+    # 运行 E2E 验证（apps/web 编辑器核心检验）
+    log "运行 E2E 测试..."
+    if pnpm --filter @profileaxis/web test:e2e 2>&1 | tail -10; then
+      log "E2E 测试通过 ✅"
+    else
+      warn "E2E 测试不通过，标记任务失败"
+      json_set "retryBudget.$task_id.lastStatus" "\"failed\""
+      json_set "activeTaskId" "null"
+      json_set "activeRunId" "null"
+      return 1
+    fi
+
     # 写结构化结果
     cat > "$AUTOMATION_DIR/results/${task_id}.result.json" << EOF
 {

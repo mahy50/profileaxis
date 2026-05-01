@@ -138,7 +138,6 @@ export function applySceneDiff(
   for (const geom of diff.updated) {
     try {
       const poolKey = geom.kind === 'box' ? boxPoolKey(geom as BoxGeometry) : cylinderPoolKey(geom as CylinderGeometry);
-      const { Matrix } = require('@babylonjs/core');
       const entry = pool.getOrCreatePool(poolKey, () => createBaseMesh(scene, geom));
       const slot = pool.acquire(entry, geom.id);
       updateThinInstance(scene, entry.baseMesh, slot, geom);

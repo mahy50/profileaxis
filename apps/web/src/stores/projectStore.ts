@@ -53,6 +53,16 @@ function makeEmptyProject(): ProjectDocument {
     resolved.modules[0].moduleId = 'bay-1';
   }
 
+  // Compute BOM and checks from resolved DSL so the initial state is fully populated
+  let initialBom: { designBom: DesignBomItem[]; tradeBom: TradeBomItem[] } = { designBom: [], tradeBom: [] };
+  let initialChecks: CheckIssue[] = [];
+  try {
+    initialBom = computeBomSummary(resolved);
+  } catch { /* stdlib not available */ }
+  try {
+    initialChecks = check(resolved);
+  } catch { /* rules pipeline not available */ }
+
   return {
     schemaVersion: '1.0.0',
     projectId: `proj-${Date.now()}`,
@@ -65,9 +75,9 @@ function makeEmptyProject(): ProjectDocument {
     resolvedDsl: resolved,
     structuralNodes: [...resolved.nodes],
     jointNodes: [...resolved.joints],
-    designBom: [],
-    tradeBom: [],
-    checkIssues: [],
+    designBom: initialBom.designBom,
+    tradeBom: initialBom.tradeBom,
+    checkIssues: initialChecks,
     currentRevisionId: 'init',
     commandCursor: 0,
     snapshotIds: [],

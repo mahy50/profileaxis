@@ -32,14 +32,14 @@
 
 | TaskId | 标题 | 目标 | 依赖 | 验收标准 |
 |--------|------|------|------|----------|
-| P1-001 | 局部编辑解释器 | `ReferenceContext → EditIntent → Command` 打通 | P0-005, P0-012, P0-013 | 10 个核心动作中至少 8 个可用 |
-| P1-002 | 属性面板受约束编辑 | 宽高深、层高、后撑、型材系列可编辑 | P0-012, P0-013 | 属性面板与命令桥接正常 |
-| P1-003 | 检测面板与解释 | blocker / warning / info 可筛选、可定位 | P0-005, P0-012 | 检测结果可定位到结构树节点 |
-| P1-004 | 三视图 SVG 与 PDF | 输出工程方案单 | P0-009, P0-011 | PDF 关键尺寸与 BOM 摘要一致 |
-| P1-005 | catalog ETL 工具 | catalog CSV/XLSX → 规范化 JSON | P0-004, P0-002 | 新 catalog 可校验并产出 canonical JSON |
-| P1-006 | Babylon 选择/高亮/diff spike | 验证 thin-instance picking 稳定性 | P0-007 | 选中/高亮稳定，Scene 重建不丢状态 |
-| P1-007 | 局部编辑指代消解验证 | 用 20 条 golden utterance 回放 | P1-001 | 目标解析准确率 ≥85% |
-| P1-008 | 规则合法化确定性验证 | 同输入 100 次 hash 比对 | P0-005 | hash 100% 一致 |
+| P1-001 | 局部编辑解释器 | `ReferenceContext → EditIntent → Command` 打通 | P0-005, P0-012, P0-013 | 10 个核心动作中至少 8 个可用 | queued |
+| P1-002 | 属性面板受约束编辑 | 宽高深、层高、后撑、型材系列可编辑 | P0-012, P0-013 | 属性面板与命令桥接正常 | queued |
+| P1-003 | 检测面板与解释 | blocker / warning / info 可筛选、可定位 | P0-005, P0-012 | 检测结果可定位到结构树节点 | queued |
+| P1-004 | 三视图 SVG 与 PDF | 输出工程方案单 | P0-009, P0-011 | PDF 关键尺寸与 BOM 摘要一致 | queued |
+| P1-005 | catalog ETL 工具 | catalog CSV/XLSX → 规范化 JSON | P0-004, P0-002 | 新 catalog 可校验并产出 canonical JSON | queued |
+| P1-006 | Babylon 选择/高亮/diff spike | 验证 thin-instance picking 稳定性 | P0-007 | 选中/高亮稳定，Scene 重建不丢状态 | queued |
+| P1-007 | 局部编辑指代消解验证 | 用 20 条 golden utterance 回放 | P1-001 | 目标解析准确率 ≥85% | queued |
+| P1-008 | 规则合法化确定性验证 | 同输入 100 次 hash 比对 | P0-005 | hash 100% 一致 | queued |
 
 ### P2 任务（可延期）
 

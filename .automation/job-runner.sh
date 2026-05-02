@@ -47,7 +47,7 @@ pick_next_task() {
 with open('$TASK_BOARD') as f:
     lines = f.readlines()
 for l in lines:
-    if l.startswith('| P0-'):
+    if l.startswith('| P0-') or l.startswith('| P1-'):
         cols = [c.strip() for c in l.split('|')]
         # 8 列: TaskId|标题|目标|依赖|输入|输出|验收标准|状态
         if len(cols) >= 9 and cols[8] == 'queued':
@@ -113,7 +113,7 @@ for l in lines:
         in_section = True
         continue
     if in_section:
-        if l.strip().startswith('**P0-'):
+        if l.strip().startswith('**P0-') or l.strip().startswith('**P1-'):
             break
         if l.strip():
             desc_lines.append(l.strip())
@@ -150,7 +150,7 @@ all_done() {
 import re
 with open('$TASK_BOARD') as f:
     lines = f.readlines()
-remaining = [l for l in lines if l.startswith('| P0-')]
+remaining = [l for l in lines if l.startswith('| P0-') or l.startswith('| P1-')]
 queued = [l for l in remaining if 'queued' in l.split('|')[7].strip() if len(l.split('|'))>=8]
 if queued:
     print(len(queued))

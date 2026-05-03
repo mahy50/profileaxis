@@ -4,6 +4,7 @@ import Viewport3D from './Viewport3D.vue';
 import StructureTree from './StructureTree.vue';
 import BomPanel from './BomPanel.vue';
 import ChecksPanel from './ChecksPanel.vue';
+import ChatCommandInput from './ChatCommandInput.vue';
 import { useProjectStore } from '@/stores/projectStore';
 import { useCommandStore } from '@/stores/commandStore';
 import { createCommandBus } from '@/services/commandBus';
@@ -84,6 +85,12 @@ function handleRedo() {
         <Viewport3D />
       </main>
     </div>
+
+    <!-- Chat command input -->
+    <ChatCommandInput
+      @command-executed="() => {}"
+      @command-error="() => {}"
+    />
   </div>
 </template>
 

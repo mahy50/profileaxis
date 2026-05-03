@@ -49,8 +49,9 @@ with open('$TASK_BOARD') as f:
 for l in lines:
     if l.startswith('| P0-') or l.startswith('| P1-'):
         cols = [c.strip() for c in l.split('|')]
-        # 8 列: TaskId|标题|目标|依赖|输入|输出|验收标准|状态
-        if len(cols) >= 9 and cols[8] == 'queued':
+        # P0 table: 9 cols (status=8), P1 table: 7 cols (status=6)
+        status_col = 8 if len(cols) >= 9 else (6 if len(cols) >= 7 else None)
+        if status_col is not None and cols[status_col] == 'queued':
             print(cols[1])
             break
 " 2>/dev/null
@@ -92,16 +93,24 @@ import re
 with open('$TASK_BOARD') as f:
     content = f.read()
 
-# 找 P0 任务表中匹配的行
+# 匹配任务行，P0表9列，P1表7列（无输入/输出列）
 for l in content.split('\n'):
     if l.startswith('| $1 '):
         cols = [c.strip() for c in l.split('|')]
-        print(f'任务ID: {cols[2]}')
-        print(f'目标: {cols[3]}')
-        print(f'依赖: {cols[4]}')
-        print(f'输入: {cols[5]}')
-        print(f'输出: {cols[6]}')
-        print(f'验收: {cols[7]}')
+        if len(cols) >= 9:
+            # P0 table: TaskId|标题|目标|依赖|输入|输出|验收标准|状态
+            print(f'任务ID: {cols[1]}')
+            print(f'目标: {cols[3]}')
+            print(f'依赖: {cols[4]}')
+            print(f'输入: {cols[5]}')
+            print(f'输出: {cols[6]}')
+            print(f'验收: {cols[7]}')
+        else:
+            # P1 table: TaskId|标题|目标|依赖|验收标准|状态（无输入/输出）
+            print(f'任务ID: {cols[1]}')
+            print(f'目标: {cols[3]}')
+            print(f'依赖: {cols[4]}')
+            print(f'验收: {cols[5]}')
         break
 
 # 提取该任务下方的详细说明（到下一个任务或空行为止）
@@ -147,11 +156,15 @@ else:
 # 检查是否所有 P0 都完成了
 all_done() {
   local remaining=$(python3 -c "
-import re
 with open('$TASK_BOARD') as f:
     lines = f.readlines()
-remaining = [l for l in lines if l.startswith('| P0-') or l.startswith('| P1-')]
-queued = [l for l in remaining if 'queued' in l.split('|')[7].strip() if len(l.split('|'))>=8]
+queued = []
+for l in lines:
+    if l.startswith('| P0-') or l.startswith('| P1-'):
+        cols = [c.strip() for c in l.split('|')]
+        status_col = 8 if len(cols) >= 9 else (6 if len(cols) >= 7 else None)
+        if status_col is not None and cols[status_col] == 'queued':
+            queued.append(l)
 if queued:
     print(len(queued))
 " 2>/dev/null)
@@ -211,14 +224,15 @@ PROMPT
   write_heartbeat "$task_id" "executing"
 
   local cc_exit=0
-  npx @anthropic-ai/claude-code \
+  ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" ANTHROPIC_BASE_URL="$ANTHROPIC_BASE_URL" \
+    npx @anthropic-ai/claude-code --bare \
     -p "$(cat "$AUTOMATION_DIR/tasks/${task_id}-prompt.txt")" \
     --model deepseek-v4-pro \
     --allowedTools "Bash(pnpm *),Bash(ls *),Bash(find *),Bash(cat *),Bash(grep *),Bash(node *),Bash(npx *),Bash(mkdir *),Bash(cp *),Read,Write,Edit" \
     --max-budget-usd 2 \
     --add-dir "$REPO_ROOT" \
-    --verbose \
-    2>&1 | tee "$AUTOMATION_DIR/tasks/${task_id}-output.log" || cc_exit=$?
+    2>&1 | tee "$AUTOMATION_DIR/tasks/${task_id}-output.log"
+    cc_exit=${PIPESTATUS[0]}
 
   # 解析结果
   if [[ $cc_exit -eq 0 ]] && grep -q "COMPLETED: $task_id" "$AUTOMATION_DIR/tasks/${task_id}-output.log" 2>/dev/null; then

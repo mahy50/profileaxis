@@ -20,7 +20,8 @@
     "@profileaxis/rules": "workspace:*",
     "@profileaxis/bom": "workspace:*",
     "@profileaxis/export": "workspace:*",
-    "@profileaxis/ai-contracts": "workspace:*"
+    "@profileaxis/ai-contracts": "workspace:*",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

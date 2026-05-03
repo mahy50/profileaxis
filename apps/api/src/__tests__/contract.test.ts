@@ -11,6 +11,7 @@ import {
   runEditIntent,
   runCheckExplain,
 } from '../services/ai-orchestrator/index.js';
+import * as XLSX from 'xlsx';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────────
 
@@ -244,5 +245,205 @@ describe('Contract: getVersions', () => {
     expect(v.promptVersion).toBeDefined();
     expect(v.currentCatalogVersion).toBeDefined();
     expect(v.stdlibVersion).toBe(v.currentCatalogVersion);
+  });
+});
+
+// ── Catalog test helpers ──────────────────────────────────────────────────────────
+
+function buildValidXlsxBase64(): string {
+  const profileRows = [
+    {
+      profileKey: 'P-TEST-001',
+      seriesName: 'Test Series',
+      crossSection: 'C-Channel',
+      dimensions: '{"widthMm":50,"heightMm":30,"wallThicknessMm":2}',
+      material: 'Steel Q235',
+      weightKgPerM: 1.5,
+      loadRatingN: 500,
+      finishOptions: '[{"finishKey":"galvanized","description":"Hot-dip galvanized"}]',
+    },
+  ];
+
+  const connectorRows = [
+    {
+      connectorKey: 'C-TEST-001',
+      connectorFamilyKey: 'test-family',
+      topology: 'corner-3way',
+      compatibleProfileKeys: '["P-TEST-001"]',
+      hardwareItems: '[{"partNumber":"BOLT-M8","description":"M8 bolt","quantity":4}]',
+    },
+  ];
+
+  const supplierRows = [
+    {
+      supplierId: 'SUP-TEST-001',
+      name: 'Test Supplier',
+      region: 'Shanghai',
+      leadTimeDays: 14,
+      minOrderQty: 10,
+      packRounding: 5,
+      currency: 'CNY',
+      paymentTerms: 'NET30',
+    },
+  ];
+
+  const skuRows = [
+    {
+      profileSpecKey: 'P-TEST-001',
+      connectorSpecKey: 'C-TEST-001',
+      tradeBomSku: 'SKU-TEST-001',
+      tradeBomDesc: 'Test SKU item',
+      unitCost: 12.5,
+      currency: 'CNY',
+      unit: 'pcs',
+      lengthMm: 1000,
+    },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(profileRows), 'profiles');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(connectorRows), 'connectors');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(supplierRows), 'supplierPolicies');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(skuRows), 'skuMappings');
+
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return buf.toString('base64');
+}
+
+function buildInvalidXlsxBase64(): string {
+  // Missing required fields in profiles (no profileKey)
+  const profileRows = [
+    {
+      seriesName: 'Bad Row',
+      crossSection: 'Unknown',
+      dimensions: '{}',
+      material: 'Unknown',
+      weightKgPerM: 0,
+      loadRatingN: 0,
+      finishOptions: '[]',
+    },
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(profileRows), 'profiles');
+  // Add empty valid sheets so the importer doesn't complain about missing sheets
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), 'connectors');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), 'supplierPolicies');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([]), 'skuMappings');
+
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return buf.toString('base64');
+}
+
+// ── Catalog endpoint tests ────────────────────────────────────────────────────────
+
+describe('Contract: Catalog endpoints', () => {
+  let server: Server;
+
+  beforeAll(() => {
+    server = createApiServer({ port: 0 });
+  });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  test('GET /v1/catalog/latest returns CATALOG_FIXTURE', async () => {
+    const { status, data } = await httpGet(server, '/v1/catalog/latest');
+    expect(status).toBe(200);
+    const d = data as Record<string, unknown>;
+    expect(d.status).toBe('ok');
+    expect(d.catalog).toBeDefined();
+    const cat = d.catalog as Record<string, unknown>;
+    expect(cat.version).toBeDefined();
+    expect(cat.profiles).toBeDefined();
+    expect(Array.isArray(cat.profiles)).toBe(true);
+    expect(cat.connectors).toBeDefined();
+    expect(cat.supplierPolicies).toBeDefined();
+    expect(cat.skuMappings).toBeDefined();
+  });
+
+  test('GET /v1/catalog/:version with unknown version returns 404', async () => {
+    const { status, data } = await httpGet(server, '/v1/catalog/nonexistent-1.0');
+    expect(status).toBe(404);
+    const d = data as Record<string, unknown>;
+    expect(d.error).toBeDefined();
+  });
+
+  test('POST /v1/catalog/import with valid XLSX returns 200 and catalog', async () => {
+    const base64 = buildValidXlsxBase64();
+    const { status, data } = await httpPost(server, '/v1/catalog/import', {
+      format: 'xlsx',
+      data: base64,
+      version: '1.0.0-test',
+    });
+    expect(status).toBe(200);
+    const d = data as Record<string, unknown>;
+    expect(d.status).toBe('ok');
+    expect(d.catalog).toBeDefined();
+    const cat = d.catalog as Record<string, unknown>;
+    expect(cat.version).toBe('1.0.0-test');
+    expect(Array.isArray(cat.profiles)).toBe(true);
+    expect((cat.profiles as unknown[]).length).toBe(1);
+    expect(Array.isArray(cat.connectors)).toBe(true);
+    expect((cat.connectors as unknown[]).length).toBe(1);
+    expect(Array.isArray(cat.supplierPolicies)).toBe(true);
+    expect((cat.supplierPolicies as unknown[]).length).toBe(1);
+    expect(Array.isArray(cat.skuMappings)).toBe(true);
+    expect((cat.skuMappings as unknown[]).length).toBe(1);
+    expect(d.validation).toBeDefined();
+    const val = d.validation as Record<string, unknown>;
+    expect(val.valid).toBe(true);
+  });
+
+  test('POST /v1/catalog/import with invalid data returns 422', async () => {
+    const base64 = buildInvalidXlsxBase64();
+    const { status, data } = await httpPost(server, '/v1/catalog/import', {
+      format: 'xlsx',
+      data: base64,
+    });
+    expect(status).toBe(422);
+    const d = data as Record<string, unknown>;
+    expect(d.status).toBe('error');
+    expect(d.errors).toBeDefined();
+    expect(Array.isArray(d.errors)).toBe(true);
+  });
+
+  test('POST /v1/catalog/import with empty data returns 400', async () => {
+    const { status, data } = await httpPost(server, '/v1/catalog/import', {
+      format: 'xlsx',
+      data: '',
+    });
+    expect(status).toBe(400);
+    const d = data as Record<string, unknown>;
+    expect(d.error).toBeDefined();
+  });
+
+  test('POST /v1/catalog/import with unknown format returns 400', async () => {
+    const { status, data } = await httpPost(server, '/v1/catalog/import', {
+      format: 'pdf',
+      data: 'dGVzdA==',
+    });
+    expect(status).toBe(400);
+    const d = data as Record<string, unknown>;
+    expect(d.error).toBeDefined();
+  });
+
+  test('POST /v1/catalog/import with CSV format accepts the input', async () => {
+    // CSV format is accepted by the router; xlsx parses it into a single default sheet,
+    // so named sheets (profiles/connectors/etc.) won't be found — resulting in empty catalog.
+    // For multi-sheet import, use XLSX. For CSV with separate files, use catalog-etl module.
+    const csvContent = 'profileKey,seriesName,crossSection\nP-1,S1,Rect\n';
+    const base64 = Buffer.from(csvContent).toString('base64');
+
+    const { status, data } = await httpPost(server, '/v1/catalog/import', {
+      format: 'csv',
+      data: base64,
+      version: '1.0.0-csv',
+    });
+    // CSV is accepted but won't have named sheets → empty catalog passes schema validation
+    expect(status).toBe(200);
+    const d = data as Record<string, unknown>;
+    expect(d.status).toBe('ok');
   });
 });

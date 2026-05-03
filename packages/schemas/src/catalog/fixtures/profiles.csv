@@ -1,0 +1,4 @@
+profileKey,seriesName,crossSection,widthMm,heightMm,wallThicknessMm,material,weightKgPerM,loadRatingN,finishOptions
+PA-UC90-70-2.5,UC90,C-channel,90,70,2.5,Q355 steel,5.24,85000,"[{""finishKey"":""FZ-pre galvanized"",""description"":""Pre-galvanized (Z275 g/m²), interior use""},{""finishKey"":""PP-RAL5015"",""description"":""Powder-coated RAL 5015 sky blue, standard rack color""},{""finishKey"":""PP-RAL6011"",""description"":""Powder-coated RAL 6011 reseda green""},{""finishKey"":""EP-electrophoretic"",""description"":""Electrophoretic dip coating, highest corrosion resistance""}]"
+PB-SB60-40-2.0,SB60,step-beam,60,40,2.0,Q355 steel,3.21,45000,"[{""finishKey"":""FZ-pre galvanized"",""description"":""Pre-galvanized (Z275 g/m²)""},{""finishKey"":""PP-RAL5015"",""description"":""Powder-coated RAL 5015 sky blue""}]"
+PC-AI50-50-3,AI50,angle-iron,50,50,3.0,Q235 steel,2.32,32000,"[{""finishKey"":""FZ-pre galvanized"",""description"":""Pre-galvanized (Z275 g/m²)""}]"

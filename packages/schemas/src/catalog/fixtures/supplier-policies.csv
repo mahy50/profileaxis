@@ -1,0 +1,4 @@
+supplierId,name,region,leadTimeDays,minOrderQty,packRounding,currency,paymentTerms,notes
+SUP-SSW-001,上海 steelworks 货架型材有限公司,华东,14,50,10,CNY,T/T 30% 定金 70% 发货前,主要 upright 和 beam 供应商 ISO9001 认证
+SUP-HZL-002,杭州之力金属制品有限公司,华东,10,100,20,CNY,T/T 30% 定金 70% 发货前,角铁和辅助型材供应商
+SUP-FAS-003,Fasten Industrial (Suzhou),华东,7,200,50,CNY,T/T 预付,螺栓螺母紧固件供应商 非标定做

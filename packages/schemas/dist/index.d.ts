@@ -67,7 +67,7 @@ export interface EditIntent {
     needsFollowUp: boolean;
 }
 export type { ValidationResult } from './validators/validator.js';
-export { validateIntent, validateConfirmation, validateDraft, validateResolved } from './validators/validator.js';
+export { validateIntent, validateConfirmation, validateDraft, validateResolved, validateCatalog } from './validators/validator.js';
 export type AIResponseStatus = 'ok' | 'refusal' | 'schema_error';
 export interface AIOKResponse<T> {
     status: 'ok';
@@ -83,4 +83,6 @@ export interface AISchemaErrorResponse {
     schemaPath?: string;
 }
 export type AIResponse<T> = AIOKResponse<T> | AIRefusalResponse | AISchemaErrorResponse;
+export type { CatalogFixture, ProfileSpec as CatalogProfileSpec, ConnectorSpec as CatalogConnectorSpec, SupplierPolicyData as CatalogSupplierPolicyData, SkuMappingData as CatalogSkuMappingData, CatalogEtlResult, } from './catalog/catalog-etl.js';
+export { buildCatalogFromRows, buildCatalogFromCsvFiles, buildCatalogFromXlsxFile, writeCanonicalJson, } from './catalog/catalog-etl.js';
 //# sourceMappingURL=index.d.ts.map

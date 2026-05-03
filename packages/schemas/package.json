@@ -12,19 +12,25 @@
     "./validators": {
       "import": "./dist/validators/validator.js",
       "types": "./dist/validators/validator.d.ts"
+    },
+    "./catalog": {
+      "import": "./dist/catalog/catalog-etl.js",
+      "types": "./dist/catalog/catalog-etl.d.ts"
     }
   },
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.validators.json && cp -r src/dsl dist/ && cp -r src/api dist/",
+    "build": "tsc && tsc -p tsconfig.validators.json && cp -r src/dsl dist/ && cp -r src/api dist/ && cp -r src/catalog dist/",
     "typecheck": "tsc --noEmit",
-    "test": "node dist/validators/run-fixtures.js",
+    "test": "node dist/validators/run-fixtures.js && node dist/catalog/run-catalog-etl.js",
     "validate:fixtures": "node dist/validators/run-fixtures.js",
+    "validate:catalog": "node dist/catalog/run-catalog-etl.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "@profileaxis/domain": "workspace:*",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.1.1"
+    "ajv-formats": "^2.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

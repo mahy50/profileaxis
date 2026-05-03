@@ -18,11 +18,15 @@ const draftApiSchema = JSON.parse(readFileSync(resolve(API_DIR, 'draft.schema.js
 // Initialize Ajv with formats (date-time, uri, etc.)
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
+// Catalog schema
+const CATALOG_DIR = resolve(__dirname, '../catalog');
+const catalogFixtureSchema = JSON.parse(readFileSync(resolve(CATALOG_DIR, 'catalog-fixture.schema.json'), 'utf-8'));
 // Compile validators
 const validateIntentDsl = ajv.compile(intentDslSchema);
 const validateConfirmationDsl = ajv.compile(confirmationDslSchema);
 const validateDraftDsl = ajv.compile(draftDslSchema);
 const validateResolvedDsl = ajv.compile(resolvedDslSchema);
+const validateCatalogFn = ajv.compile(catalogFixtureSchema);
 function formatErrors(validateFn) {
     if (validateFn.errors) {
         return {
@@ -51,4 +55,8 @@ export function validateResolved(data) {
     const valid = validateResolvedDsl(data);
     return formatErrors(validateResolvedDsl);
 }
-export { validateIntentDsl, validateConfirmationDsl, validateDraftDsl, validateResolvedDsl };
+export function validateCatalog(data) {
+    const valid = validateCatalogFn(data);
+    return formatErrors(validateCatalogFn);
+}
+export { validateIntentDsl, validateConfirmationDsl, validateDraftDsl, validateResolvedDsl, validateCatalogFn as validateCatalogDsl };

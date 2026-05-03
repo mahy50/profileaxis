@@ -113,7 +113,7 @@ export interface EditIntent {
 
 // Runtime validators (built to dist/validators/)
 export type { ValidationResult } from './validators/validator.js';
-export { validateIntent, validateConfirmation, validateDraft, validateResolved } from './validators/validator.js';
+export { validateIntent, validateConfirmation, validateDraft, validateResolved, validateCatalog } from './validators/validator.js';
 
 // API Response types
 export type AIResponseStatus = 'ok' | 'refusal' | 'schema_error';
@@ -135,3 +135,19 @@ export interface AISchemaErrorResponse {
 }
 
 export type AIResponse<T> = AIOKResponse<T> | AIRefusalResponse | AISchemaErrorResponse;
+
+// Catalog ETL: CSV/XLSX → normalized JSON
+export type {
+  CatalogFixture,
+  ProfileSpec as CatalogProfileSpec,
+  ConnectorSpec as CatalogConnectorSpec,
+  SupplierPolicyData as CatalogSupplierPolicyData,
+  SkuMappingData as CatalogSkuMappingData,
+  CatalogEtlResult,
+} from './catalog/catalog-etl.js';
+export {
+  buildCatalogFromRows,
+  buildCatalogFromCsvFiles,
+  buildCatalogFromXlsxFile,
+  writeCanonicalJson,
+} from './catalog/catalog-etl.js';

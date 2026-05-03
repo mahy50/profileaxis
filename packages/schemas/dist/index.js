@@ -3,5 +3,6 @@
 // Schema version
 export const SCHEMA_VERSION = '1.0.0';
 export { SCHEMA_VERSION as DOMAIN_SCHEMA_VERSION } from '@profileaxis/domain';
-export { validateIntent, validateConfirmation, validateDraft, validateResolved } from './validators/validator.js';
+export { validateIntent, validateConfirmation, validateDraft, validateResolved, validateCatalog } from './validators/validator.js';
+export { buildCatalogFromRows, buildCatalogFromCsvFiles, buildCatalogFromXlsxFile, writeCanonicalJson, } from './catalog/catalog-etl.js';
 //# sourceMappingURL=index.js.map

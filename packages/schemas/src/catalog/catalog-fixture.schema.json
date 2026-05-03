@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://profileaxis.dev/schemas/catalog/catalog-fixture.schema.json",
+  "title": "CatalogFixture",
+  "description": "Canonical catalog shape — profiles, connectors, supplier policies, SKU mappings.",
+  "type": "object",
+  "required": ["version", "profiles", "connectors", "supplierPolicies", "skuMappings"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profiles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ProfileSpec" }
+    },
+    "connectors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ConnectorSpec" }
+    },
+    "supplierPolicies": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SupplierPolicyData" }
+    },
+    "skuMappings": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SkuMappingData" }
+    }
+  },
+
+  "definitions": {
+    "ProfileSpec": {
+      "type": "object",
+      "required": ["profileKey", "seriesName", "crossSection", "dimensions", "material", "weightKgPerM", "loadRatingN", "finishOptions"],
+      "additionalProperties": false,
+      "properties": {
+        "profileKey": { "type": "string", "minLength": 1 },
+        "seriesName": { "type": "string", "minLength": 1 },
+        "crossSection": { "type": "string", "minLength": 1 },
+        "dimensions": {
+          "type": "object",
+          "required": ["widthMm", "heightMm", "wallThicknessMm"],
+          "additionalProperties": false,
+          "properties": {
+            "widthMm": { "type": "number", "minimum": 0 },
+            "heightMm": { "type": "number", "minimum": 0 },
+            "wallThicknessMm": { "type": "number", "minimum": 0 }
+          }
+        },
+        "material": { "type": "string", "minLength": 1 },
+        "weightKgPerM": { "type": "number", "minimum": 0 },
+        "loadRatingN": { "type": "number", "minimum": 0 },
+        "finishOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["finishKey", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "finishKey": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "ConnectorSpec": {
+      "type": "object",
+      "required": ["connectorKey", "connectorFamilyKey", "topology", "compatibleProfileKeys", "hardwareItems"],
+      "additionalProperties": false,
+      "properties": {
+        "connectorKey": { "type": "string", "minLength": 1 },
+        "connectorFamilyKey": { "type": "string", "minLength": 1 },
+        "topology": { "type": "string", "minLength": 1 },
+        "compatibleProfileKeys": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hardwareItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["partNumber", "description", "quantity"],
+            "additionalProperties": false,
+            "properties": {
+              "partNumber": { "type": "string", "minLength": 1 },
+              "description": { "type": "string" },
+              "quantity": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+
+    "SupplierPolicyData": {
+      "type": "object",
+      "required": ["supplierId", "name", "region", "leadTimeDays", "minOrderQty", "packRounding", "currency", "paymentTerms"],
+      "additionalProperties": false,
+      "properties": {
+        "supplierId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "region": { "type": "string", "minLength": 1 },
+        "leadTimeDays": { "type": "integer", "minimum": 0 },
+        "minOrderQty": { "type": "integer", "minimum": 0 },
+        "packRounding": { "type": "integer", "minimum": 1 },
+        "currency": { "type": "string", "minLength": 1 },
+        "paymentTerms": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "SkuMappingData": {
+      "type": "object",
+      "required": ["profileSpecKey", "connectorSpecKey", "tradeBomSku", "tradeBomDesc", "unitCost", "currency", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "profileSpecKey": { "type": "string" },
+        "connectorSpecKey": { "type": "string" },
+        "tradeBomSku": { "type": "string", "minLength": 1 },
+        "tradeBomDesc": { "type": "string", "minLength": 1 },
+        "unitCost": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
+        "lengthMm": { "type": ["number", "null"], "minimum": 0 }
+      }
+    }
+  }
+}

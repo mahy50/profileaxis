@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "activeTaskId": null,
-  "activeRunId": null,
+  "activeTaskId": "P1-001",
+  "activeRunId": "20260502081542-61355",
   "lastCompletedTaskId": "P0-014",
   "lastRunStatus": "completed",
   "lastHeartbeatAt": "2026-04-28T05:21:21Z",

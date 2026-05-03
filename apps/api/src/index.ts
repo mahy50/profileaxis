@@ -11,6 +11,8 @@ import { handleIntent } from './routes/ai-intent.js';
 import { handleDraft } from './routes/ai-draft.js';
 import { handleEditIntent } from './routes/ai-edit-intent.js';
 import { handleCheckExplain } from './routes/check-explain.js';
+import { handleCatalogImport, handleCatalogGet } from './routes/catalog-import.js';
+import { loadXlsxModule } from './services/catalog/index.js';
 import { sendJson } from './routes/_utils.js';
 import type { OrchestratorConfig } from './services/ai-orchestrator/index.js';
 import {
@@ -19,6 +21,7 @@ import {
   runEditIntent,
   runCheckExplain,
 } from './services/ai-orchestrator/index.js';
+import { CATALOG_FIXTURE } from '@profileaxis/stdlib';
 
 // ── Version endpoint ───────────────────────────────────────────────────────────────
 
@@ -31,10 +34,13 @@ export function getVersions() {
   };
 }
 
-// ── Placeholder endpoints (to be implemented in future tasks) ──────────────────────
+// ── Catalog service ───────────────────────────────────────────────────────────────
 
 export async function getCatalog(version: string) {
-  return { version, message: 'Catalog endpoint not yet implemented' };
+  if (version === 'latest' || version === CATALOG_FIXTURE.version) {
+    return { version, catalog: CATALOG_FIXTURE };
+  }
+  return { version, catalog: null, message: `Catalog version "${version}" not found` };
 }
 
 export async function exportPdf(projectDocument: unknown) {
@@ -99,9 +105,23 @@ export function createApiServer(config: ApiServerConfig = {}): Server {
         return;
       }
 
+      // Catalog import
+      if (method === 'POST' && url === '/v1/catalog/import') {
+        await handleCatalogImport(req, res);
+        return;
+      }
+
+      // Catalog get by version
+      if (method === 'GET' && url.startsWith('/v1/catalog/')) {
+        await handleCatalogGet(req, res, port);
+        return;
+      }
+
+      // Legacy export/pdf route — now delegates to catalog
       if (method === 'GET' && url.startsWith('/v1/export/pdf')) {
         const version = new URL(url, `http://localhost:${port}`).searchParams.get('version') ?? 'latest';
-        sendJson(res, 200, await getCatalog(version));
+        const catalogResult = await getCatalog(version);
+        sendJson(res, catalogResult.catalog ? 200 : 404, catalogResult.catalog ? { status: 'ok', catalog: catalogResult.catalog } : catalogResult);
         return;
       }
 
@@ -113,7 +133,13 @@ export function createApiServer(config: ApiServerConfig = {}): Server {
     }
   });
 
-  server.listen(port, () => {
+  server.listen(port, async () => {
+    // Preload xlsx for catalog import
+    try {
+      await loadXlsxModule();
+    } catch {
+      console.warn('Catalog import (XLSX/CSV) will not be available — xlsx module failed to load');
+    }
     console.log(`ProfileAxis API server listening on port ${port}`);
   });
 
